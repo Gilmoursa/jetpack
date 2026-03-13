@@ -265,7 +265,7 @@ class SSO_Test extends BaseTestCase {
 			array( $user_id, 12345 )
 		);
 
-		$this->assertSame( '12345', get_user_meta( $user_id, 'wpcom_user_id', true ) );
+		$this->assertEquals( 12345, get_user_meta( $user_id, 'wpcom_user_id', true ) );
 
 		wp_delete_user( $user_id );
 	}
@@ -313,7 +313,7 @@ class SSO_Test extends BaseTestCase {
 			array( $user_a, 12345 )
 		);
 
-		$this->assertSame( '12345', get_user_meta( $user_a, 'wpcom_user_id', true ) );
+		$this->assertEquals( 12345, get_user_meta( $user_a, 'wpcom_user_id', true ) );
 		$this->assertEmpty( get_user_meta( $user_b, 'wpcom_user_id', true ) );
 
 		wp_delete_user( $user_a );
@@ -366,7 +366,7 @@ class SSO_Test extends BaseTestCase {
 			array( $user_a, 99999 )
 		);
 
-		$this->assertSame( '99999', get_user_meta( $user_a, 'wpcom_user_id', true ) );
+		$this->assertEquals( 99999, get_user_meta( $user_a, 'wpcom_user_id', true ) );
 		$this->assertEmpty( get_user_meta( $user_b, 'wpcom_user_id', true ) );
 		$this->assertEmpty( get_user_meta( $user_c, 'wpcom_user_id', true ) );
 
@@ -395,7 +395,7 @@ class SSO_Test extends BaseTestCase {
 			array( $user_id, 55555 )
 		);
 
-		$this->assertSame( '55555', get_user_meta( $user_id, 'wpcom_user_id', true ) );
+		$this->assertEquals( 55555, get_user_meta( $user_id, 'wpcom_user_id', true ) );
 
 		wp_delete_user( $user_id );
 	}
