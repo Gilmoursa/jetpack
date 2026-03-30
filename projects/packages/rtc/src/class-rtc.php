@@ -86,12 +86,27 @@ class RTC {
 
 		$allowed_providers = array( 'http-polling', 'pinghub' );
 
+		// PingHub requires a WP.com user token. On Jetpack/Atomic sites where
+		// the current user hasn't linked their account, fall back to http-polling
+		// so the editor stays functional without a WebSocket connection.
+		$default_providers = array( 'pinghub' );
+		if (
+			! defined( 'IS_WPCOM' ) &&
+			class_exists( 'Automattic\Jetpack\Connection\Manager' ) &&
+			get_current_user_id()
+		) {
+			$manager = new \Automattic\Jetpack\Connection\Manager();
+			if ( $manager->is_connected() && ! $manager->is_user_connected( get_current_user_id() ) ) {
+				$default_providers = array( 'http-polling' );
+			}
+		}
+
 		/**
 		 * Filter the list of RTC providers.
 		 *
 		 * @param string[] $providers List of provider identifiers.
 		 */
-		$providers = apply_filters( 'jetpack_rtc_providers', array( 'pinghub' ) );
+		$providers = apply_filters( 'jetpack_rtc_providers', $default_providers );
 		if ( ! is_array( $providers ) ) {
 			return array();
 		}

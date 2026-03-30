@@ -191,8 +191,6 @@ export class PingHubBridge {
 	/** Cached JWT for PingHub authentication. */
 	private cachedJwt: string | null = null;
 	private cachedJwtTimestamp = 0;
-	/** Set to true once we learn the user has no WP.com connection, to avoid repeated connection attempts. */
-	private userNotConnected = false;
 	/** Reassembly buffer: key = room + ':' + msgId, value = { totalChunks, chunks } */
 	private chunkBuffers = new Map<
 		string,
@@ -324,11 +322,6 @@ export class PingHubBridge {
 	 * Fetch a short-lived JWT for PingHub authentication via the REST endpoint.
 	 * Caches the token for 1 minute to avoid redundant requests on reconnects.
 	 *
-	 * If the endpoint returns `user_not_connected` (the current user has no
-	 * Jetpack/WP.com user token), fires a `wpcom-rtc-user-not-connected` window
-	 * event so the editor can prompt the user to link their account, and marks
-	 * the bridge so that future connect() calls are skipped.
-	 *
 	 * @return JWT string, or null on failure.
 	 */
 	private async fetchPinghubJwt(): Promise< string | null > {
@@ -345,18 +338,8 @@ export class PingHubBridge {
 			this.cachedJwtTimestamp = Date.now();
 			pixel( 'pinghub.rtc.jwt_fetch', Date.now() - start, 'ms' );
 			return this.cachedJwt;
-		} catch ( error ) {
+		} catch {
 			pixel( 'pinghub.rtc.jwt_fetch_error', Date.now() - start, 'ms' );
-			if (
-				! this.userNotConnected &&
-				error !== null &&
-				typeof error === 'object' &&
-				'code' in error &&
-				error.code === 'user_not_connected'
-			) {
-				this.userNotConnected = true;
-				window.dispatchEvent( new CustomEvent( 'wpcom-rtc-user-not-connected' ) );
-			}
 			return null;
 		}
 	}
@@ -373,12 +356,6 @@ export class PingHubBridge {
 	 * @return Promise
 	 */
 	async connect( room: string ): Promise< void > {
-		// User has no WP.com connection — skip all WebSocket attempts to avoid an
-		// infinite reconnection loop. The modal handles the user prompt.
-		if ( this.userNotConnected ) {
-			return Promise.reject( new Error( 'User not connected to WordPress.com' ) );
-		}
-
 		// Already open: fire open handlers and return.
 		const existing = this.sockets.get( room );
 		if ( existing?.readyState === WebSocket.OPEN ) {
