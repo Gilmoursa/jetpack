@@ -16,6 +16,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import RtcAdminSomeoneWaitingNotice from './notices/rtc-admin-someone-waiting-notice';
 import { registerConnectionErrorModalFilter } from './notices/rtc-connection-error-modal-filter';
 import RtcNonAdminPostUpgradeNotice from './notices/rtc-non-admin-post-upgrade-notice';
+import RtcUserNotConnectedModal from './notices/rtc-user-not-connected-modal';
 import RtcWelcomeNotice from './notices/rtc-welcome-notice';
 import { withRoomLimit } from './room-limit';
 import type { ProviderCreator } from '@wordpress/sync';
@@ -60,6 +61,7 @@ const RtcNoticesPlugin = () => {
 	return (
 		<>
 			<RtcWelcomeNotice />
+			<RtcUserNotConnectedModal />
 			{ enableLimitNotices && <RtcAdminSomeoneWaitingNotice /> }
 			{ enableLimitNotices && <RtcNonAdminPostUpgradeNotice /> }
 		</>

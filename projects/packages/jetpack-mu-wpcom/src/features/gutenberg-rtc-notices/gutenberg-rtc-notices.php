@@ -107,6 +107,17 @@ function wpcom_enqueue_rtc_notices_assets() {
 	$is_admin_user = current_user_can( 'manage_options' );
 	$is_plan_owner = wpcom_rtc_is_plan_owner();
 
+	// Build the WP.com user-connection URL for users on Jetpack/Atomic who have
+	// not yet linked their account. Simple (IS_WPCOM) sites are skipped because
+	// all users there are already WP.com users.
+	$connect_user_url = '';
+	if ( ! defined( 'IS_WPCOM' ) && class_exists( 'Automattic\Jetpack\Connection\Manager' ) ) {
+		$manager = new \Automattic\Jetpack\Connection\Manager();
+		if ( ! $manager->is_user_connected( get_current_user_id() ) ) {
+			$connect_user_url = (string) $manager->get_authorization_url( null, null, 'rtc' );
+		}
+	}
+
 	$data = wp_json_encode(
 		array(
 			'isAdmin'            => $is_admin_user,
@@ -119,6 +130,7 @@ function wpcom_enqueue_rtc_notices_assets() {
 			'siteSlug'           => wpcom_get_site_slug(),
 			'maxPeersPerRoom'    => wpcom_get_rtc_max_peers_per_room(),
 			'enableLimitNotices' => apply_filters( 'wpcom_rtc_enable_limit_notices', false ),
+			'connectUserUrl'     => $connect_user_url,
 		),
 		JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP
 	);
