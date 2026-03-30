@@ -189,6 +189,9 @@ class Manager {
 
 		// Initial Partner management.
 		Partner::init();
+
+		// Site Health integration.
+		Site_Health::init();
 	}
 
 	/**
