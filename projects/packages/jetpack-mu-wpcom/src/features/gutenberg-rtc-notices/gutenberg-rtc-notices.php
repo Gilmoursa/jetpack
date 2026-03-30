@@ -114,7 +114,7 @@ function wpcom_enqueue_rtc_notices_assets() {
 	if ( ! defined( 'IS_WPCOM' ) && class_exists( 'Automattic\Jetpack\Connection\Manager' ) ) {
 		$user_id = get_current_user_id();
 		$manager = new \Automattic\Jetpack\Connection\Manager();
-		if ( $user_id && ! $manager->is_user_connected( $user_id ) ) {
+		if ( $user_id && $manager->is_connected() && ! $manager->is_user_connected( $user_id ) ) {
 			$connect_user_url = (string) $manager->get_authorization_url( null, null, 'rtc' );
 		}
 	}
