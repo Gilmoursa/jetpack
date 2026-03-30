@@ -112,8 +112,9 @@ function wpcom_enqueue_rtc_notices_assets() {
 	// all users there are already WP.com users.
 	$connect_user_url = '';
 	if ( ! defined( 'IS_WPCOM' ) && class_exists( 'Automattic\Jetpack\Connection\Manager' ) ) {
+		$user_id = get_current_user_id();
 		$manager = new \Automattic\Jetpack\Connection\Manager();
-		if ( ! $manager->is_user_connected( get_current_user_id() ) ) {
+		if ( $user_id && ! $manager->is_user_connected( $user_id ) ) {
 			$connect_user_url = (string) $manager->get_authorization_url( null, null, 'rtc' );
 		}
 	}
