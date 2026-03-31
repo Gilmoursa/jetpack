@@ -552,7 +552,7 @@ class Connection_Health_Tests extends Connection_Health_Test_Base {
 			}
 		}
 
-		if ( false === $invalid_tokens_exist ) {
+		if ( ! $invalid_tokens_exist ) {
 			return self::passing_test( array( 'name' => $name ) );
 		}
 
