@@ -192,6 +192,9 @@ class Manager {
 
 		// Site Health integration.
 		Site_Health::init();
+
+		// WP 7.0+ Connectors screen card.
+		Wpcom_Connector::init();
 	}
 
 	/**
