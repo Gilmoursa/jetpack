@@ -9,14 +9,14 @@
  */
 return [
     // # Issue statistics:
-    // PhanTypeMismatchArgument : 430+ occurrences
+    // PhanTypeMismatchArgument : 420+ occurrences
     // PhanPluginDuplicateConditionalNullCoalescing : 260+ occurrences
-    // PhanTypeMismatchArgumentProbablyReal : 200+ occurrences
+    // PhanTypeMismatchArgumentProbablyReal : 190+ occurrences
     // PhanTypeMismatchReturn : 140+ occurrences
     // PhanTypeMismatchReturnProbablyReal : 120+ occurrences
     // PhanTypePossiblyInvalidDimOffset : 90+ occurrences
+    // PhanTypeArraySuspiciousNullable : 70+ occurrences
     // PhanDeprecatedFunction : 60+ occurrences
-    // PhanTypeArraySuspiciousNullable : 55+ occurrences
     // PhanRedefineFunction : 45+ occurrences
     // PhanPluginDuplicateAdjacentStatement : 40+ occurrences
     // PhanTypeExpectedObjectPropAccess : 30+ occurrences
@@ -24,9 +24,9 @@ return [
     // PhanTypeMismatchPropertyProbablyReal : 25+ occurrences
     // PhanDeprecatedProperty : 20+ occurrences
     // PhanParamSignatureMismatch : 20+ occurrences
-    // PhanPluginSimplifyExpressionBool : 20+ occurrences
     // PhanTypeArraySuspicious : 20+ occurrences
     // PhanTypeMismatchDimFetch : 20+ occurrences
+    // PhanPluginSimplifyExpressionBool : 15+ occurrences
     // PhanSuspiciousMagicConstant : 15+ occurrences
     // PhanTypeMismatchArgumentNullable : 15+ occurrences
     // PhanTypeMismatchPropertyDefault : 15+ occurrences
@@ -53,12 +53,12 @@ return [
     // PhanTypeInvalidLeftOperandOfAdd : 4 occurrences
     // PhanTypeInvalidLeftOperandOfBitwiseOp : 4 occurrences
     // PhanTypeInvalidRightOperandOfBitwiseOp : 4 occurrences
-    // PhanDeprecatedFunctionInternal : 3 occurrences
     // PhanDeprecatedTrait : 3 occurrences
     // PhanStaticPropIsStaticType : 3 occurrences
     // PhanTypeMismatchArgumentReal : 3 occurrences
     // PhanTypeObjectUnsetDeclaredProperty : 3 occurrences
     // PhanUndeclaredMethodInCallable : 3 occurrences
+    // PhanDeprecatedFunctionInternal : 2 occurrences
     // PhanImpossibleConditionInLoop : 2 occurrences
     // PhanNonClassMethodCall : 2 occurrences
     // PhanParamTooMany : 2 occurrences
@@ -123,8 +123,6 @@ return [
         '_inc/lib/core-api/wpcom-endpoints/memberships.php' => ['PhanPluginDuplicateConditionalNullCoalescing', 'PhanPluginUnreachableCode', 'PhanTypeArraySuspicious'],
         '_inc/lib/core-api/wpcom-endpoints/publicize-connection-test-results.php' => ['PhanPluginMixedKeyNoKey', 'PhanTypeMismatchArgument'],
         '_inc/lib/core-api/wpcom-endpoints/service-api-keys.php' => ['PhanPluginDuplicateConditionalNullCoalescing', 'PhanTypeArraySuspicious', 'PhanTypeMismatchReturnProbablyReal'],
-        '_inc/lib/debugger/class-jetpack-cxn-test-base.php' => ['PhanDeprecatedFunctionInternal', 'PhanTypeArraySuspiciousNullable', 'PhanTypeMismatchArgumentInternal', 'PhanTypeMismatchReturn'],
-        '_inc/lib/debugger/class-jetpack-cxn-tests.php' => ['PhanPluginSimplifyExpressionBool'],
         '_inc/lib/debugger/class-jetpack-debug-data.php' => ['PhanTypeMismatchArgument'],
         '_inc/lib/debugger/class-jetpack-debugger.php' => ['PhanTypeMismatchArgumentProbablyReal'],
         '_inc/lib/debugger/debug-functions.php' => ['PhanTypeMismatchReturnProbablyReal'],
