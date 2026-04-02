@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * tests (sync health), encryption, and Jetpack-specific helper overrides.
  *
  * Jetpack-specific tests are also registered with the connection package's
- * Site Health integration via the jetpack_connection_health_tests_loaded action.
+ * Site Health integration via the jetpack_connection_tests_loaded action.
  */
 class Jetpack_Cxn_Tests extends Connection_Health_Test_Base {
 
@@ -70,7 +70,7 @@ class Jetpack_Cxn_Tests extends Connection_Health_Test_Base {
 					'label'             => __( 'Jetpack Sync has been disabled on your site.', 'jetpack' ),
 					'severity'          => 'recommended',
 					'action'            => 'https://github.com/Automattic/jetpack/blob/trunk/projects/packages/sync/src/class-settings.php',
-					'action_label'      => __( 'See Github for more on Sync Settings', 'jetpack' ),
+					'action_label'      => __( 'See GitHub for more on Sync Settings', 'jetpack' ),
 					'short_description' => __( 'Jetpack Sync has been disabled on your site. This could be impacting some of your site\'s Jetpack-powered features. Developers may enable / disable syncing using the Sync Settings API.', 'jetpack' ),
 				)
 			);
