@@ -76,7 +76,7 @@
 		"@wordpress/primitives": "4.43.0",
 		"@wordpress/route": "0.9.0",
 		"@wordpress/theme": "0.10.0",
-		"@wordpress/ui": "0.9.0",
+		"@wordpress/ui": "0.10.0",
 		"@wordpress/url": "4.43.0",
 		"clsx": "2.1.1",
 		"copy-webpack-plugin": "14.0.0",
