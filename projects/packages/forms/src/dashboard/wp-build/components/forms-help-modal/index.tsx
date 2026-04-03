@@ -61,6 +61,7 @@ export default function FormsHelpModal( { isOpen, onClose }: Props ) {
 		<Modal
 			title={ __( 'Some of your existing forms may not appear here yet', 'jetpack-forms' ) }
 			onRequestClose={ handleClose }
+			style={ { maxWidth: '600px' } }
 		>
 			<VStack spacing="4">
 				<Text>
