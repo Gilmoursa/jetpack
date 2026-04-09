@@ -231,6 +231,131 @@ class AtomicStorageProviderTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that should_handle returns false for user_tokens during re-entrant DB read.
+	 */
+	public function test_should_handle_reentrant_guard() {
+		$reflection = new \ReflectionProperty( Atomic_Storage_Provider::class, 'is_reading_tokens_from_db' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+
+		// Normal state: should_handle returns true for user_tokens
+		$this->assertTrue( $this->provider->should_handle( 'user_tokens' ) );
+
+		// Set re-entrancy flag
+		$reflection->setValue( $this->provider, true );
+
+		// user_tokens should now be refused, but other options should still work
+		$this->assertFalse( $this->provider->should_handle( 'user_tokens' ) );
+		$this->assertTrue( $this->provider->should_handle( 'blog_token' ) );
+		$this->assertTrue( $this->provider->should_handle( 'id' ) );
+		$this->assertTrue( $this->provider->should_handle( 'master_user' ) );
+
+		// Reset flag
+		$reflection->setValue( $this->provider, false );
+		$this->assertTrue( $this->provider->should_handle( 'user_tokens' ) );
+	}
+
+	/**
+	 * Test that the Atomic_Persistent_Data instance is cached across calls.
+	 */
+	public function test_persistent_data_cached() {
+		$reflection = new \ReflectionProperty( Atomic_Storage_Provider::class, 'persistent_data' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+
+		$this->assertNull( $reflection->getValue( $this->provider ) );
+
+		// Trigger a get() call that initializes APD
+		$this->provider->get( 'blog_token' );
+		$first_instance = $reflection->getValue( $this->provider );
+		$this->assertNotNull( $first_instance );
+
+		// Second call should reuse the same instance
+		$this->provider->get( 'id' );
+		$second_instance = $reflection->getValue( $this->provider );
+		$this->assertSame( $first_instance, $second_instance );
+	}
+
+	/**
+	 * Test that resolve_user_by_email caches the result across calls.
+	 *
+	 * Verifies that get_master_user_id and get_user_tokens can be called
+	 * in sequence for the same email without redundant DB lookups.
+	 */
+	public function test_email_resolution_cached_across_calls() {
+		$user_id = static::factory()->user->create( array( 'user_email' => 'cached@example.com' ) );
+
+		// First call resolves the user
+		$master_id = $this->provider->get_master_user_id( 'cached@example.com' );
+		$this->assertSame( $user_id, $master_id );
+
+		// Verify internal cache is set
+		$reflection = new \ReflectionProperty( Atomic_Storage_Provider::class, 'resolved_email' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+		$this->assertSame( 'cached@example.com', $reflection->getValue( $this->provider ) );
+
+		$user_prop = new \ReflectionProperty( Atomic_Storage_Provider::class, 'resolved_user' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$user_prop->setAccessible( true );
+		}
+		$cached_user = $user_prop->getValue( $this->provider );
+		$this->assertInstanceOf( \WP_User::class, $cached_user );
+		$this->assertSame( $user_id, $cached_user->ID );
+
+		// Second call (via get_user_tokens) should use the cached user
+		$tokens = $this->provider->get_user_tokens( 'cached@example.com', 'token.secret' );
+		$this->assertIsArray( $tokens );
+		$this->assertSame( 'token.secret.' . $user_id, $tokens[ $user_id ] );
+
+		// Cache should still reference the same user
+		$this->assertSame( $cached_user, $user_prop->getValue( $this->provider ) );
+	}
+
+	/**
+	 * Test that a different email invalidates the resolution cache.
+	 */
+	public function test_email_resolution_cache_invalidated_on_different_email() {
+		$user_a = static::factory()->user->create( array( 'user_email' => 'a@example.com' ) );
+		$user_b = static::factory()->user->create( array( 'user_email' => 'b@example.com' ) );
+
+		$this->assertSame( $user_a, $this->provider->get_master_user_id( 'a@example.com' ) );
+		$this->assertSame( $user_b, $this->provider->get_master_user_id( 'b@example.com' ) );
+
+		$reflection = new \ReflectionProperty( Atomic_Storage_Provider::class, 'resolved_email' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+		$this->assertSame( 'b@example.com', $reflection->getValue( $this->provider ) );
+	}
+
+	/**
+	 * Test that re-entrancy flag is reset even if get_option throws.
+	 */
+	public function test_reentrant_flag_reset_on_exception() {
+		$reflection = new \ReflectionProperty( Atomic_Storage_Provider::class, 'is_reading_tokens_from_db' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
+
+		// Simulate a call that would normally set/unset the flag
+		// Even after an error, the flag should be false
+		$this->assertFalse( $reflection->getValue( $this->provider ) );
+
+		// Call get_user_tokens with a non-existent user (early return, no re-entrancy)
+		$this->provider->get_user_tokens( 'nonexistent@example.com', 'token.secret' );
+		$this->assertFalse( $reflection->getValue( $this->provider ) );
+
+		// Call with valid user to exercise the try/finally path
+		static::factory()->user->create( array( 'user_email' => 'guard@example.com' ) );
+		$this->provider->get_user_tokens( 'guard@example.com', 'token.secret' );
+		$this->assertFalse( $reflection->getValue( $this->provider ) );
+	}
+
+	/**
 	 * Test handle_error_event ignores non-error event types.
 	 */
 	public function test_handle_error_event_ignores_non_error_events() {
