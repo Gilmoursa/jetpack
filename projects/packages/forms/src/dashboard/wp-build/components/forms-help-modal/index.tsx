@@ -65,14 +65,23 @@ export default function FormsHelpModal( { isOpen, onClose }: Props ) {
 		>
 			<VStack spacing="4">
 				<Text>
-					{ createInterpolateElement(
-						__(
-							'Forms you already added to pages or posts will continue to work. To manage them in this dashboard, open the page or post, select the form, and click <strong>Edit form</strong> once.',
-							'jetpack-forms'
-						),
-						{ strong: <strong /> }
+					{ __(
+						'Forms you already added to pages or posts will continue to work.',
+						'jetpack-forms'
 					) }
 				</Text>
+				<Text>{ __( 'To manage them in this dashboard:', 'jetpack-forms' ) }</Text>
+				<ol>
+					<li>{ __( 'Open the page or post', 'jetpack-forms' ) }</li>
+					<li>{ __( 'Select the form', 'jetpack-forms' ) }</li>
+					<li>
+						{ createInterpolateElement(
+							__( 'Click <strong>Edit form</strong> once', 'jetpack-forms' ),
+							{ strong: <strong /> }
+						) }
+					</li>
+					<li>{ __( 'Save the page or post', 'jetpack-forms' ) }</li>
+				</ol>
 				<HStack justify="space-between" alignment="center">
 					<CheckboxControl
 						__nextHasNoMarginBottom
