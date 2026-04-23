@@ -758,6 +758,9 @@ class Jetpack {
 
 		// Register Jetpack module management abilities (WordPress Abilities API, WP 6.9+).
 		\Automattic\Jetpack\Plugin\Abilities\Modules_Abilities::init();
+
+		// Register Jetpack Monitor abilities (WordPress Abilities API, WP 6.9+).
+		\Automattic\Jetpack\Plugin\Abilities\Monitor_Abilities::init();
 	}
 
 	/**
