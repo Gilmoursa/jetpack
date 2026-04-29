@@ -3317,6 +3317,14 @@ async function savePost( postStatus, isAutosave = false ) {
 			state.message = isUpdate ? i18n.updated || 'Updated!' : i18n.published || 'Published!';
 			// Clear any autosave draft reference on publish.
 			localStorage.removeItem( AUTOSAVE_STORAGE_KEY );
+
+			// Track publish event client-side for reliable Write editor attribution.
+			window._tkq = window._tkq || [];
+			window._tkq.push( [
+				'recordEvent',
+				'wpcom_write_editor_post_published',
+				{ post_id: post.id, is_new_post: ! isEditing },
+			] );
 			setTimeout( () => {
 				window.location.href = post.link;
 			}, 800 );
