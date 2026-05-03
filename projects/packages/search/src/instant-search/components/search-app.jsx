@@ -656,6 +656,8 @@ class SearchApp extends Component {
 							enableFallbackImage={ this.state.overlayOptions.enableFallbackImage }
 							fallbackImageUrl={ this.state.overlayOptions.fallbackImageUrl }
 							showProductPrice={ this.state.overlayOptions.enableProductPrice }
+							suggestionsEnabled={ !! this.props.options.searchSuggestionsEnabled }
+							siteId={ this.props.options.siteId }
 						/>
 					</Overlay>,
 					document.body

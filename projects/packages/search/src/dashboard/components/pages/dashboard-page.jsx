@@ -92,6 +92,9 @@ export default function DashboardPage( { isLoading = false } ) {
 		select( STORE_ID ).isTogglingInstantSearch()
 	);
 	const isSearchBlocksEnabled = useSelect( select => select( STORE_ID ).isSearchBlocksEnabled() );
+	const isSearchSuggestionsEnabled = useSelect( select =>
+		select( STORE_ID ).isSearchSuggestionsEnabled()
+	);
 
 	// Record Meter data
 	const tierMaximumRecords = useSelect( select => select( STORE_ID ).getTierMaximumRecords() );
@@ -209,6 +212,7 @@ export default function DashboardPage( { isLoading = false } ) {
 											isTogglingModule={ isTogglingModule }
 											isTogglingInstantSearch={ isTogglingInstantSearch }
 											readerChatGuidelinesUrl={ readerChatGuidelinesUrl }
+											isSearchSuggestionsEnabled={ isSearchSuggestionsEnabled }
 										/>
 									) }
 								</div>

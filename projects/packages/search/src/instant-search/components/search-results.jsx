@@ -294,6 +294,8 @@ class SearchResults extends Component {
 							isVisible={ this.props.isVisible }
 							onChangeSearch={ this.props.onChangeSearch }
 							searchQuery={ this.props.searchQuery }
+							suggestionsEnabled={ this.props.suggestionsEnabled }
+							siteId={ this.props.siteId }
 						/>
 						<button
 							className="jetpack-instant-search__overlay-close"
