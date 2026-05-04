@@ -196,6 +196,11 @@ export function makeBaseConfig( configurl, opts = {} ) {
 				wordpressEslintPlugin.configs.custom,
 				wordpressEslintPlugin.configs.esnext,
 				wordpressEslintPlugin.configs.i18n,
+				{
+					rules: {
+						'@wordpress/use-recommended-components': 'error',
+					},
+				},
 
 				{
 					plugins: {
@@ -435,6 +440,14 @@ export function makeBaseConfig( configurl, opts = {} ) {
 			},
 			rules: {
 				'@typescript-eslint/no-require-imports': 'off',
+			},
+		},
+
+		// .cjs files are always Node.js scripts — add Node.js globals too.
+		{
+			files: [ '**/*.cjs' ],
+			languageOptions: {
+				globals: globals.node,
 			},
 		},
 
