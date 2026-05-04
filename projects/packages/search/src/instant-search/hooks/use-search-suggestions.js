@@ -32,6 +32,13 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 
 			try {
 				const { apiNonce, homeUrl, isPrivateSite, isWpcom } = window[ SERVER_OBJECT_NAME ] ?? {};
+				// eslint-disable-next-line no-console
+				console.log( '[search-suggestions] routing', {
+					isPrivateSite,
+					isWpcom,
+					homeUrl,
+					hasNonce: !! apiNonce,
+				} );
 				const path = `/${ encodeURIComponent(
 					sId
 				) }/search-suggestions?query=${ encodeURIComponent( q ) }&size=5`;
@@ -39,6 +46,8 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 					isPrivateSite && isWpcom
 						? `${ homeUrl }/wp-json/wpcom-origin/wpcom/v2/sites${ path }`
 						: `https://public-api.wordpress.com/wpcom/v2/sites${ path }`;
+				// eslint-disable-next-line no-console
+				console.log( '[search-suggestions] url', url );
 				const fetchOptions = {
 					signal: abortRef.current.signal,
 					...( isPrivateSite && {
