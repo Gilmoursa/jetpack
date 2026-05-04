@@ -1,7 +1,6 @@
 import debounce from 'debounce';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-const SUGGESTIONS_URL_BASE = 'https://public-api.wordpress.com/wpcom/v2/sites';
+import { SERVER_OBJECT_NAME } from '../lib/constants';
 
 /**
  * Fetches search query suggestions from the WPCOM suggestions API.
@@ -32,17 +31,33 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 			setIsLoading( true );
 
 			try {
-				const url = `${ SUGGESTIONS_URL_BASE }/${ encodeURIComponent( sId ) }/search-suggestions?query=${ encodeURIComponent( q ) }&size=5`;
-				const response = await fetch( url, { signal: abortRef.current.signal } );
+				const { apiNonce, homeUrl, isPrivateSite, isWpcom } = window[ SERVER_OBJECT_NAME ] ?? {};
+				const path = `/${ encodeURIComponent(
+					sId
+				) }/search-suggestions?query=${ encodeURIComponent( q ) }&size=5`;
+				const url =
+					isPrivateSite && isWpcom
+						? `${ homeUrl }/wp-json/wpcom-origin/wpcom/v2/sites${ path }`
+						: `https://public-api.wordpress.com/wpcom/v2/sites${ path }`;
+				const fetchOptions = {
+					signal: abortRef.current.signal,
+					...( isPrivateSite && {
+						headers: { 'X-WP-Nonce': apiNonce },
+						credentials: 'include',
+					} ),
+				};
+				const response = await fetch( url, fetchOptions );
 				if ( ! response.ok ) {
 					setSuggestions( [] );
 					return;
 				}
 				const data = await response.json();
-				const items = Array.isArray( data )
-					? data
-					: data.suggestions ?? data.results ?? [];
-				setSuggestions( items.map( item => ( typeof item === 'string' ? item : item.query ?? item.text ?? '' ) ).filter( Boolean ) );
+				const items = Array.isArray( data ) ? data : data.suggestions ?? data.results ?? [];
+				setSuggestions(
+					items
+						.map( item => ( typeof item === 'string' ? item : item.query ?? item.text ?? '' ) )
+						.filter( Boolean )
+				);
 			} catch ( err ) {
 				if ( err.name !== 'AbortError' ) {
 					setSuggestions( [] );
