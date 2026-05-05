@@ -1,0 +1,4 @@
+Significance: patch
+Type: other
+
+Search blocks: add a regression test covering is_initial_loading() returning true when ?q= is set off the search route.

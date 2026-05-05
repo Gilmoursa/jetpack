@@ -408,6 +408,29 @@ class Search_Blocks_Test extends TestCase {
 	}
 
 	/**
+	 * Off the search route, `?q=…` is the only URL key that seeds the
+	 * search query, so `is_initial_loading()` must read it through
+	 * `parse_url_search_query()` (which honors `get_search_param_name()`)
+	 * rather than WP's `get_search_query()` (which is hard-wired to the
+	 * `s` query var on the global `WP_Query`). On a non-search page that
+	 * `WP_Query` has no `s`, so the legacy code path returned false and
+	 * left every block rendering its empty pre-hydration shell — the
+	 * regression Copilot fixed in 5af3b756 by swapping the call site.
+	 */
+	public function test_is_initial_loading_true_for_q_param_off_search_route() {
+		$original_get        = $_GET;
+		$original_query      = $GLOBALS['wp_query'] ?? null;
+		$_GET                = array( 'q' => 'boots' );
+		$GLOBALS['wp_query'] = new \WP_Query();
+		try {
+			$this->assertTrue( Search_Blocks::is_initial_loading() );
+		} finally {
+			$_GET                = $original_get;
+			$GLOBALS['wp_query'] = $original_query;
+		}
+	}
+
+	/**
 	 * Both URL keys the inline blocks may write (`s` on the search route,
 	 * `q` off it) must be reserved by `parse_url_filters()` so a hostile
 	 * or malformed `?s[]=…&q[]=…` can't smuggle the search query into
