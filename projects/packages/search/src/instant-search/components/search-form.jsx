@@ -7,13 +7,13 @@ import SearchSuggestions from './search-suggestions';
 /**
  * Search form with optional autocomplete suggestions dropdown.
  *
- * @param {object}   props                      - Component props.
- * @param {string}   props.searchQuery          - Committed search query (from Redux).
- * @param {Function} props.onChangeSearch       - Callback to commit a new query.
- * @param {boolean}  props.isVisible            - Whether the overlay is visible.
- * @param {string}   props.className            - Optional CSS class for the form element.
- * @param {boolean}  props.suggestionsEnabled   - When true, show autocomplete dropdown instead of search-as-you-type.
- * @param {string}   props.siteId               - Site ID used for the suggestions API.
+ * @param {object}   props                    - Component props.
+ * @param {string}   props.searchQuery        - Committed search query (from Redux).
+ * @param {Function} props.onChangeSearch     - Callback to commit a new query.
+ * @param {boolean}  props.isVisible          - Whether the overlay is visible.
+ * @param {string}   props.className          - Optional CSS class for the form element.
+ * @param {boolean}  props.suggestionsEnabled - When true, show autocomplete dropdown.
+ * @param {string}   props.siteId             - Site ID used for the suggestions API.
  * @return {React.ReactElement} The search form.
  */
 export default function SearchForm( {
@@ -26,13 +26,10 @@ export default function SearchForm( {
 } ) {
 	const searchInputRef = useRef( null );
 
-	// Local input value used only in suggestions mode.
 	const [ localQuery, setLocalQuery ] = useState( searchQuery );
 	const [ showSuggestions, setShowSuggestions ] = useState( false );
 	const [ activeIndex, setActiveIndex ] = useState( -1 );
 
-	// Keep localQuery in sync when the committed query changes externally
-	// (e.g. user navigates back, query cleared from outside).
 	useEffect( () => {
 		setLocalQuery( searchQuery );
 	}, [ searchQuery ] );
@@ -42,6 +39,9 @@ export default function SearchForm( {
 		siteId,
 		enabled: suggestionsEnabled,
 	} );
+
+	// Total number of selectable suggestion items (labels and separators excluded).
+	const suggestionCount = suggestions.length;
 
 	const onClear = useCallback( () => {
 		if ( suggestionsEnabled ) {
@@ -54,14 +54,11 @@ export default function SearchForm( {
 
 	const handleChange = useCallback(
 		event => {
-			// Safari's "Use advanced tracking and fingerprinting protection" privacy setting
-			// can block access to event.currentTarget.value, returning empty/undefined.
-			// In such cases, fall back to reading the value directly from the input element via ref.
 			let value;
 			try {
 				value = event.currentTarget.value;
 				if ( value === undefined || value === null ) {
-					throw new Error( 'Event value blocked by browser privacy settings' );
+					throw new Error( 'value inaccessible' );
 				}
 			} catch {
 				value = searchInputRef.current?.value ?? '';
@@ -79,11 +76,15 @@ export default function SearchForm( {
 	);
 
 	const handleSelectSuggestion = useCallback(
-		suggestion => {
-			setLocalQuery( suggestion );
+		item => {
 			setShowSuggestions( false );
 			setActiveIndex( -1 );
-			onChangeSearch( suggestion );
+			if ( item.type === 'post' || item.type === 'taxonomy' ) {
+				window.location.href = item.url;
+			} else {
+				setLocalQuery( item.text );
+				onChangeSearch( item.text );
+			}
 		},
 		[ onChangeSearch ]
 	);
@@ -93,23 +94,21 @@ export default function SearchForm( {
 			if ( ! suggestionsEnabled ) {
 				return;
 			}
-			const count = suggestions.length;
 			switch ( event.key ) {
 				case 'ArrowDown':
 					event.preventDefault();
 					setShowSuggestions( true );
-					setActiveIndex( i => ( i < count - 1 ? i + 1 : i ) );
+					setActiveIndex( i => ( i < suggestionCount - 1 ? i + 1 : i ) );
 					break;
 				case 'ArrowUp':
 					event.preventDefault();
 					setActiveIndex( i => ( i > 0 ? i - 1 : -1 ) );
 					break;
 				case 'Enter':
-					if ( showSuggestions && activeIndex >= 0 && activeIndex < count ) {
+					if ( showSuggestions && activeIndex >= 0 && activeIndex < suggestionCount ) {
 						event.preventDefault();
 						handleSelectSuggestion( suggestions[ activeIndex ] );
 					} else if ( showSuggestions ) {
-						// Commit the typed query and run search.
 						setShowSuggestions( false );
 						onChangeSearch( localQuery );
 					}
@@ -122,11 +121,19 @@ export default function SearchForm( {
 					break;
 			}
 		},
-		[ suggestionsEnabled, suggestions, showSuggestions, activeIndex, localQuery, handleSelectSuggestion, onChangeSearch ]
+		[
+			suggestionsEnabled,
+			suggestions,
+			suggestionCount,
+			showSuggestions,
+			activeIndex,
+			localQuery,
+			handleSelectSuggestion,
+			onChangeSearch,
+		]
 	);
 
 	const handleBlur = useCallback( () => {
-		// Small delay so a click on a suggestion fires before the list is removed.
 		setTimeout( () => {
 			setShowSuggestions( false );
 			setActiveIndex( -1 );

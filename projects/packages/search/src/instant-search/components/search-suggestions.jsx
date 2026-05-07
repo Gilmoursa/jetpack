@@ -2,17 +2,49 @@ import { __ } from '@wordpress/i18n';
 import * as React from 'react';
 import './search-suggestions.scss';
 
+const GROUP_META = {
+	query: { label: __( 'Suggestions', 'jetpack-search-pkg' ) },
+	post: { label: __( 'Posts & Pages', 'jetpack-search-pkg' ) },
+	taxonomy: { label: __( 'Categories & Tags', 'jetpack-search-pkg' ) },
+};
+
+const TYPE_ORDER = [ 'query', 'post', 'taxonomy' ];
+
 /**
- * Dropdown list of autocomplete query suggestions.
+ * Dropdown list of autocomplete suggestions, grouped by type.
  *
- * @param {object}   props               - Component props.
- * @param {string[]} props.suggestions   - Array of suggestion strings.
- * @param {number}   props.activeIndex   - Index of the keyboard-highlighted suggestion (-1 for none).
- * @param {Function} props.onSelect      - Called with the selected suggestion string.
+ * @param {object}   props             - Component props.
+ * @param {Array}    props.suggestions - Array of SuggestionItem objects.
+ * @param {number}   props.activeIndex - Flat index of the keyboard-highlighted item (-1 for none).
+ * @param {Function} props.onSelect    - Called with the selected SuggestionItem.
  * @return {React.ReactElement|null} The rendered suggestions list or null.
  */
 export default function SearchSuggestions( { suggestions, activeIndex, onSelect } ) {
 	if ( ! suggestions || suggestions.length === 0 ) {
+		return null;
+	}
+
+	// Group items while preserving a flat index for keyboard navigation.
+	const groups = [];
+	let flatIndex = 0;
+
+	for ( const type of TYPE_ORDER ) {
+		const items = suggestions
+			.map( ( item, originalIndex ) => ( { item, originalIndex } ) )
+			.filter( ( { item } ) => item.type === type );
+
+		if ( items.length === 0 ) {
+			continue;
+		}
+
+		groups.push( {
+			type,
+			label: GROUP_META[ type ]?.label ?? type,
+			entries: items.map( ( { item } ) => ( { item, flatIndex: flatIndex++ } ) ),
+		} );
+	}
+
+	if ( groups.length === 0 ) {
 		return null;
 	}
 
@@ -22,22 +54,34 @@ export default function SearchSuggestions( { suggestions, activeIndex, onSelect 
 			role="listbox"
 			aria-label={ __( 'Search suggestions', 'jetpack-search-pkg' ) }
 		>
-			{ suggestions.map( ( suggestion, index ) => (
-				<li
-					key={ index }
-					className={
-						'jetpack-instant-search__search-suggestion' +
-						( index === activeIndex ? ' is-active' : '' )
-					}
-					role="option"
-					aria-selected={ index === activeIndex }
-					// mousedown fires before blur; preventDefault keeps the input focused
-					// so the click handler can run before the input loses focus.
-					onMouseDown={ e => e.preventDefault() }
-					onClick={ () => onSelect( suggestion ) }
-				>
-					{ suggestion }
-				</li>
+			{ groups.map( ( group, groupIndex ) => (
+				<React.Fragment key={ group.type }>
+					{ groupIndex > 0 && (
+						<li className="jetpack-instant-search__search-suggestions-separator" role="separator" />
+					) }
+					<li className="jetpack-instant-search__search-suggestions-label" role="presentation">
+						{ group.label }
+					</li>
+					{ group.entries.map( ( { item, flatIndex: idx } ) => (
+						<li
+							key={ idx }
+							className={
+								'jetpack-instant-search__search-suggestion' +
+								' jetpack-instant-search__search-suggestion--' +
+								item.type +
+								( idx === activeIndex ? ' is-active' : '' )
+							}
+							role="option"
+							aria-selected={ idx === activeIndex }
+							tabIndex={ -1 }
+							onMouseDown={ e => e.preventDefault() }
+							onClick={ () => onSelect( item ) }
+							onKeyDown={ e => e.key === 'Enter' && onSelect( item ) }
+						>
+							{ item.text }
+						</li>
+					) ) }
+				</React.Fragment>
 			) ) }
 		</ul>
 	);
