@@ -71,6 +71,9 @@ export default function DashboardPage( { isLoading = false } ) {
 	const aiAgentAccessGuidelinesUrl = useSelect( select =>
 		select( STORE_ID ).getAIAgentAccessGuidelinesUrl()
 	);
+	const isAIAgentAccessAvailable = useSelect( select =>
+		select( STORE_ID ).isAIAgentAccessAvailable()
+	);
 	const { hasConnectionError } = useConnectionErrorNotice();
 
 	const sendPaidPlanToCart = () => {
@@ -196,7 +199,10 @@ export default function DashboardPage( { isLoading = false } ) {
 									supportsOnlyClassicSearch={ supportsOnlyClassicSearch }
 								/>
 							) }
-							<AIAgentAccessControl guidelinesUrl={ aiAgentAccessGuidelinesUrl } />
+							<AIAgentAccessControl
+								guidelinesUrl={ aiAgentAccessGuidelinesUrl }
+								isAvailable={ isAIAgentAccessAvailable }
+							/>
 						</div>
 						{ ! isPageLoading && (
 							<>
