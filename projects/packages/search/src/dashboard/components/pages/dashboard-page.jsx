@@ -68,6 +68,9 @@ export default function DashboardPage( { isLoading = false } ) {
 	const readerChatGuidelinesUrl = useSelect( select =>
 		select( STORE_ID ).getReaderChatGuidelinesUrl()
 	);
+	const aiAgentAccessGuidelinesUrl = useSelect( select =>
+		select( STORE_ID ).getAIAgentAccessGuidelinesUrl()
+	);
 	const { hasConnectionError } = useConnectionErrorNotice();
 
 	const sendPaidPlanToCart = () => {
@@ -193,7 +196,7 @@ export default function DashboardPage( { isLoading = false } ) {
 									supportsOnlyClassicSearch={ supportsOnlyClassicSearch }
 								/>
 							) }
-							<AIAgentAccessControl />
+							<AIAgentAccessControl guidelinesUrl={ aiAgentAccessGuidelinesUrl } />
 						</div>
 						{ ! isPageLoading && (
 							<>
