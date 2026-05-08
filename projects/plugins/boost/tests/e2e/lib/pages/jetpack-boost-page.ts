@@ -128,6 +128,35 @@ export default class JetpackBoostPage {
 	}
 
 	/**
+	 * Waits for Critical CSS generation to complete by intercepting the DataSync
+	 * polling response for `critical_css_state`. Resolves once the status
+	 * transitions away from "pending" / "not_generated", which is the same signal
+	 * the UI uses to render the critical-css-meta element.
+	 *
+	 * @param {number} timeout - Maximum time to wait in milliseconds.
+	 */
+	async waitForCriticalCssGeneration( timeout = 60000 ) {
+		await this.page.waitForResponse(
+			async response => {
+				if (
+					! response.url().includes( '/jetpack_boost_ds/critical-css-state' ) ||
+					response.request().method() !== 'GET' ||
+					! response.ok()
+				) {
+					return false;
+				}
+				try {
+					const body = await response.json();
+					return body?.status !== 'pending' && body?.status !== 'not_generated';
+				} catch {
+					return false;
+				}
+			},
+			{ timeout }
+		);
+	}
+
+	/**
 	 * Waits for the client to send the speed score refresh request.
 	 * Use when the test asserts that the client initiated a refresh — for example,
 	 * to verify that a debounce timer has fired. Decouples from backend latency and
