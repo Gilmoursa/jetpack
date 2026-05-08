@@ -3324,7 +3324,7 @@ async function savePost( postStatus, isAutosave = false ) {
 			window._tkq.push( [
 				'recordEvent',
 				'wpcom_write_editor_post_published',
-				{ post_id: post.id },
+				{ post_id: post.id, is_update: isUpdate },
 			] );
 			setTimeout( () => {
 				window.location.href = post.link;
