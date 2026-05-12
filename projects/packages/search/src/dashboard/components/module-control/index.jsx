@@ -7,6 +7,7 @@ import { createInterpolateElement } from '@wordpress/element';
 import { sprintf, __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { Fragment, useCallback } from 'react';
+import AIAgentAccessControl from 'components/ai-agent-access-control';
 import Card from 'components/card';
 import ReaderChatControl from 'components/reader-chat-control';
 import InstantSearchUpsellNudge from 'components/upsell-nudge';
@@ -41,12 +42,14 @@ const WIDGETS_EDITOR_URL = 'widgets.php';
  * @param {boolean}  props.isInstantSearchPromotionActive - true if search promotion is active.
  * @param {boolean}  props.isReaderChatAvailable          - true if the Reader Chat setting is available.
  * @param {boolean}  props.isReaderChatEnabled            - true if Reader Chat is enabled.
+ * @param {boolean}  props.isAIAgentAccessAvailable       - true if the AI Agent Access setting is available.
  * @param {boolean}  props.supportsOnlyClassicSearch      - true if site has plan that supports only Classic Search.
  * @param {boolean}  props.supportsSearch                 - true if site has plan that supports either Classic or Instant Search.
  * @param {boolean}  props.supportsInstantSearch          - true if site has plan that supports Instant Search.
  * @param {boolean}  props.isTogglingModule               - true if toggling Search module.
  * @param {boolean}  props.isTogglingInstantSearch        - true if toggling Instant Search option.
  * @param {string}   props.readerChatGuidelinesUrl        - Guidelines admin URL, when available.
+ * @param {string}   props.aiAgentAccessGuidelinesUrl     - AI Agent Access guidelines admin URL, when available.
  * @return {import('react').Component} Search settings component.
  */
 export default function SearchModuleControl( {
@@ -60,12 +63,14 @@ export default function SearchModuleControl( {
 	isInstantSearchPromotionActive,
 	isReaderChatAvailable,
 	isReaderChatEnabled,
+	isAIAgentAccessAvailable,
 	supportsOnlyClassicSearch,
 	supportsSearch,
 	supportsInstantSearch,
 	isTogglingModule,
 	isTogglingInstantSearch,
 	readerChatGuidelinesUrl,
+	aiAgentAccessGuidelinesUrl,
 } ) {
 	const { isUserConnected } = useConnection( {
 		redirectUri: 'admin.php?page=jetpack-search',
@@ -78,6 +83,10 @@ export default function SearchModuleControl( {
 		`admin.php?page=jetpack-search`,
 		isUserConnected || isWpcom
 	);
+	const showAIAgentAccessGuidelinesLink =
+		! isReaderChatAvailable ||
+		! isReaderChatEnabled ||
+		readerChatGuidelinesUrl !== aiAgentAccessGuidelinesUrl;
 
 	const toggleSearchModule = useCallback( () => {
 		if ( isDisabledFromOverLimit ) {
@@ -157,6 +166,12 @@ export default function SearchModuleControl( {
 						isSaving={ isSavingEitherOption }
 						guidelinesUrl={ readerChatGuidelinesUrl }
 						updateOptions={ updateOptions }
+					/>
+
+					<AIAgentAccessControl
+						guidelinesUrl={ aiAgentAccessGuidelinesUrl }
+						isAvailable={ isAIAgentAccessAvailable }
+						showGuidelinesLink={ showAIAgentAccessGuidelinesLink }
 					/>
 				</div>
 			</Card>

@@ -4,7 +4,6 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Stack, Tabs } from '@wordpress/ui';
 import { useState } from 'react';
-import AIAgentAccessControl from 'components/ai-agent-access-control';
 import AiAnswersTab from 'components/ai-answers-tab';
 import ExperienceSelector from 'components/experience-selector';
 import NoticesList from 'components/global-notices';
@@ -199,10 +198,6 @@ export default function DashboardPage( { isLoading = false } ) {
 									supportsOnlyClassicSearch={ supportsOnlyClassicSearch }
 								/>
 							) }
-							<AIAgentAccessControl
-								guidelinesUrl={ aiAgentAccessGuidelinesUrl }
-								isAvailable={ isAIAgentAccessAvailable }
-							/>
 						</div>
 						{ ! isPageLoading && (
 							<>
@@ -261,6 +256,7 @@ export default function DashboardPage( { isLoading = false } ) {
 										domain={ domain }
 										isDisabledFromOverLimit={ isOverLimit }
 										isInstantSearchPromotionActive={ isInstantSearchPromotionActive }
+										isAIAgentAccessAvailable={ isAIAgentAccessAvailable }
 										isReaderChatAvailable={ isReaderChatAvailable }
 										isReaderChatEnabled={ isReaderChatEnabled }
 										supportsOnlyClassicSearch={ supportsOnlyClassicSearch }
@@ -271,6 +267,7 @@ export default function DashboardPage( { isLoading = false } ) {
 										isSavingEitherOption={ isSavingEitherOption }
 										isTogglingModule={ isTogglingModule }
 										isTogglingInstantSearch={ isTogglingInstantSearch }
+										aiAgentAccessGuidelinesUrl={ aiAgentAccessGuidelinesUrl }
 										readerChatGuidelinesUrl={ readerChatGuidelinesUrl }
 									/>
 								) }
