@@ -740,4 +740,31 @@ class Write_Test extends \WorDBless\BaseTestCase {
 
 		$this->assertEmpty( get_post_meta( $post_id, '_last_editor_used_jetpack', true ) );
 	}
+
+	/**
+	 * Test that a user without edit_post capability cannot trigger the meta update.
+	 */
+	public function test_remember_write_editor_without_capability_does_not_set_meta() {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Capability Test',
+				'post_status' => 'draft',
+				'post_author' => $this->admin_id,
+			)
+		);
+
+		// Switch to a subscriber who cannot edit this post.
+		wp_set_current_user( $this->subscriber_id );
+
+		$request = new \WP_REST_Request( 'POST', sprintf( '/wp/v2/posts/%d', $post_id ) );
+		$request->set_body_params(
+			array(
+				'wpcom_write_editor_used' => true,
+			)
+		);
+
+		\Automattic\Jetpack\Jetpack_Mu_Wpcom\WPCOM_Block_Editor\EditorType\remember_write_editor( get_post( $post_id ), $request );
+
+		$this->assertEmpty( get_post_meta( $post_id, '_last_editor_used_jetpack', true ) );
+	}
 }
