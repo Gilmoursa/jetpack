@@ -60,7 +60,7 @@
 		"@wordpress/element": "6.44.0",
 		"@wordpress/hooks": "4.44.0",
 		"@wordpress/i18n": "6.17.0",
-		"@wordpress/icons": "12.2.0",
+		"@wordpress/icons": "13.0.0",
 		"@wordpress/interactivity": "6.44.0",
 		"@wordpress/server-side-render": "6.20.0",
 		"@wordpress/ui": "0.12.0",
