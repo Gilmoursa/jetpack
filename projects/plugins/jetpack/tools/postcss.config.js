@@ -2,7 +2,13 @@ module.exports = () => ( {
 	plugins: [
 		require( '@csstools/postcss-global-data' )( {
 			// Provide the properties that postcss-custom-properties is going to work with.
-			files: [ require.resolve( '@automattic/calypso-color-schemes/root-only/index.css' ) ],
+			files: [
+				require.resolve( '@automattic/calypso-color-schemes/root-only/index.css' ),
+				// Loads --wpds-* design tokens so legacy dashboard consumers can use raw
+				// var(--wpds-*) — these tokens normally arrive transitively via @wordpress/ui's
+				// CSS bundle, which the legacy _inc/ dashboard doesn't import.
+				require.resolve( '@wordpress/theme/design-tokens.css' ),
+			],
 		} ),
 		require( 'postcss-custom-properties' )( {
 			// Use of `preserve: false` dates back to when we still used @automattic/calypso-build.

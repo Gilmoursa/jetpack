@@ -1,0 +1,4 @@
+Significance: patch
+Type: compat
+
+Jetpack: load WPDS design tokens on legacy settings dashboard via postcss-global-data.
