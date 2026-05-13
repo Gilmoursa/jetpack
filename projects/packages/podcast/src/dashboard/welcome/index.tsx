@@ -20,12 +20,15 @@ interface WelcomeProps {
 	onEnable: () => void;
 }
 
-// Strip protocol and `/wp-admin/` from `admin_url` to get the wpcom site slug
-// (e.g. `chiles31.wordpress.com`). Works for Simple and WoA. Falls back to an
-// empty string on self-hosted Jetpack, in which case the checkout URL omits
-// the slug segment and lands the user on the generic plan picker.
+// Prefer `site.suffix` since it preserves the full Calypso site fragment
+// (e.g. `example.com::path` for mapped subdirectory sites). Fall back to
+// the admin_url host for self-hosted setups that do not publish a suffix.
 const getSiteSlug = (): string => {
-	const adminUrl = getSiteData()?.admin_url ?? '';
+	const data = getSiteData();
+	if ( data?.suffix ) {
+		return data.suffix;
+	}
+	const adminUrl = data?.admin_url ?? '';
 	if ( ! adminUrl ) {
 		return '';
 	}
