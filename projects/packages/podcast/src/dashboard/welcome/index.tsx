@@ -42,8 +42,10 @@ const getSiteSlug = (): string => {
 const getPremiumCheckoutUrl = (): string => {
 	const slug = getSiteSlug();
 	const adminUrl = getSiteData()?.admin_url ?? '';
+	// `tab=settings` bypasses the welcome gate so buyers continue configuring
+	// the podcast instead of re-seeing this same pricing card after checkout.
 	const returnTo = adminUrl
-		? `${ adminUrl.replace( /\/$/, '' ) }/admin.php?page=jetpack-podcast`
+		? `${ adminUrl.replace( /\/$/, '' ) }/admin.php?page=jetpack-podcast&tab=settings`
 		: '';
 	const base = slug
 		? `https://wordpress.com/checkout/${ slug }/premium`
