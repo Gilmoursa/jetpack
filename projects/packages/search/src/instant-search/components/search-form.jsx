@@ -66,7 +66,7 @@ export default function SearchForm( {
 
 			if ( suggestionsEnabled ) {
 				setLocalQuery( value );
-				setShowSuggestions( value.length >= 2 );
+				setShowSuggestions( value.length >= 1 );
 				setActiveIndex( -1 );
 			} else {
 				onChangeSearch( value );

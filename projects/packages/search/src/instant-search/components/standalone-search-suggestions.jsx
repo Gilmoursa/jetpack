@@ -44,7 +44,7 @@ export default function StandaloneSearchSuggestions( { input, form, siteId } ) {
 		const handleInput = e => {
 			const value = e.target.value ?? '';
 			setQuery( value );
-			setShowSuggestions( value.length >= 2 );
+			setShowSuggestions( value.length >= 1 );
 			setActiveIndex( -1 );
 		};
 		const handleBlur = () => {

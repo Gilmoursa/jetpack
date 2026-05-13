@@ -9,24 +9,20 @@ import { SERVER_OBJECT_NAME } from '../lib/constants';
  * @property {string}                    [url] - Navigation URL (post and taxonomy types).
  */
 
-// Maps the API's `type` query param to our internal SuggestionItem type.
-const API_TYPE_MAP = { query: 'query', post_title: 'post', taxonomy: 'taxonomy' };
-
 /**
- * Fetches suggestions for a single type from the WPCOM suggestions API.
+ * Fetches all suggestion types from the WPCOM suggestions API in a single request.
  *
  * @param {string}      q       - Search query.
  * @param {string}      sId     - Site ID.
- * @param {string}      type    - API type param ('query', 'post_title', or 'taxonomy').
  * @param {object}      options - Server options (apiNonce, homeUrl, isPrivateSite, isWpcom).
  * @param {AbortSignal} signal  - Abort signal.
- * @return {Promise<SuggestionItem[]>} Resolved suggestion items for this type.
+ * @return {Promise<SuggestionItem[]>} Resolved suggestion items.
  */
-async function fetchType( q, sId, type, options, signal ) {
+async function fetchSuggestionsFromApi( q, sId, options, signal ) {
 	const { apiNonce, homeUrl, isPrivateSite, isWpcom } = options;
 	const path = `/${ encodeURIComponent( sId ) }/search-suggestions?query=${ encodeURIComponent(
 		q
-	) }&size=5&type=${ type }`;
+	) }&size=5`;
 	const url =
 		isPrivateSite && isWpcom
 			? `${ homeUrl }/wp-json/wpcom-origin/wpcom/v2/sites${ path }`
@@ -43,24 +39,30 @@ async function fetchType( q, sId, type, options, signal ) {
 		return [];
 	}
 	const data = await response.json();
-	const items = Array.isArray( data ) ? data : data.suggestions ?? [];
-	const internalType = API_TYPE_MAP[ type ] ?? 'query';
-	return items
-		.map( item => {
-			const text = item.text ?? '';
-			if ( ! text ) {
-				return null;
-			}
-			if ( internalType === 'post' || internalType === 'taxonomy' ) {
-				const itemUrl = item.url ?? null;
-				if ( ! itemUrl ) {
+
+	const toItems = ( items, type ) =>
+		( items ?? [] )
+			.map( item => {
+				const text = item.text ?? '';
+				if ( ! text ) {
 					return null;
 				}
-				return { type: internalType, text, url: itemUrl };
-			}
-			return { type: 'query', text };
-		} )
-		.filter( Boolean );
+				if ( type === 'post' || type === 'taxonomy' ) {
+					const itemUrl = item.url ?? null;
+					if ( ! itemUrl ) {
+						return null;
+					}
+					return { type, text, url: itemUrl };
+				}
+				return { type: 'query', text };
+			} )
+			.filter( Boolean );
+
+	return [
+		...toItems( data.query_suggestions, 'query' ),
+		...toItems( data.title_suggestions, 'post' ),
+		...toItems( data.taxonomy_suggestions, 'taxonomy' ),
+	];
 }
 
 /**
@@ -80,7 +82,7 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const fetchSuggestions = useCallback(
 		debounce( async ( q, sId ) => {
-			if ( ! q || q.length < 2 || ! sId ) {
+			if ( ! q || ! sId ) {
 				setSuggestions( [] );
 				return;
 			}
@@ -93,12 +95,8 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 
 			try {
 				const options = window[ SERVER_OBJECT_NAME ] ?? {};
-				const results = await Promise.all(
-					[ 'query', 'post_title', 'taxonomy' ].map( type =>
-						fetchType( q, sId, type, options, abortRef.current.signal )
-					)
-				);
-				setSuggestions( results.flat() );
+				const results = await fetchSuggestionsFromApi( q, sId, options, abortRef.current.signal );
+				setSuggestions( results );
 			} catch ( err ) {
 				if ( err.name !== 'AbortError' ) {
 					setSuggestions( [] );
@@ -106,7 +104,7 @@ export default function useSearchSuggestions( { query, siteId, enabled } ) {
 			} finally {
 				setIsLoading( false );
 			}
-		}, 50 ),
+		}, 0 ),
 		[]
 	);
 
