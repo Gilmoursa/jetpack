@@ -26,6 +26,11 @@ export type ConnectionIconProps = {
 	profilePicture: string;
 	disabled?: boolean;
 	className?: string;
+	// Visual size of the avatar + overlapping service icon. `small` (default)
+	// is 28×28 avatar + 14×14 service icon for compact rows / dataviews;
+	// `medium` is 32×32 avatar + 16×16 service icon for roomier rows such as
+	// the chassis Overview "Connected accounts" list.
+	size?: 'small' | 'medium';
 };
 
 /**
@@ -39,6 +44,7 @@ export function ConnectionIcon( {
 	profilePicture,
 	disabled,
 	className,
+	size = 'small',
 }: ConnectionIconProps ) {
 	const [ imageErrorFor, setImageErrorFor ] = useState( null );
 
@@ -54,6 +60,7 @@ export function ConnectionIcon( {
 		<div
 			className={ clsx(
 				styles.wrapper,
+				styles[ size ],
 				{
 					[ styles.disabled ]: disabled,
 				},

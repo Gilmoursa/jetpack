@@ -4,7 +4,7 @@ import { Page } from '@wordpress/admin-ui';
 import { useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useNavigate } from '@wordpress/route';
-import { Stack, Tabs } from '@wordpress/ui';
+import { Stack, Tabs, Tooltip } from '@wordpress/ui';
 // Define the `--color-facebook`, `--color-twitter`, ... custom properties
 // that `SocialServiceIcon` (and friends) consume to paint per-service
 // brand colours. The legacy `social-admin-page` webpack bundle inlines
@@ -72,25 +72,27 @@ export default function SocialPage( { activeTab, actions, children }: Props ): J
 	);
 
 	return (
-		<Page
-			title={ title }
-			ariaLabel={ PRODUCT_NAME }
-			subTitle={ SUBTITLES[ activeTab ]() }
-			actions={ actions }
-			hasPadding={ false }
-		>
-			<Tabs.Root value={ activeTab } onValueChange={ onTabChange }>
-				<div className="jetpack-social-page__tabs-row">
-					<Tabs.List variant="minimal">
-						<Tabs.Tab value="overview">{ __( 'Overview', 'jetpack-publicize-pkg' ) }</Tabs.Tab>
-						<Tabs.Tab value="settings">{ __( 'Settings', 'jetpack-publicize-pkg' ) }</Tabs.Tab>
-					</Tabs.List>
-				</div>
-				<div className="jetpack-social-page__content jetpack-social-page__content--padded">
-					{ children }
-				</div>
-			</Tabs.Root>
-			<JetpackFooter />
-		</Page>
+		<Tooltip.Provider delay={ 0 }>
+			<Page
+				title={ title }
+				ariaLabel={ PRODUCT_NAME }
+				subTitle={ SUBTITLES[ activeTab ]() }
+				actions={ actions }
+				hasPadding={ false }
+			>
+				<Tabs.Root value={ activeTab } onValueChange={ onTabChange }>
+					<div className="jetpack-social-page__tabs-row">
+						<Tabs.List variant="minimal">
+							<Tabs.Tab value="overview">{ __( 'Overview', 'jetpack-publicize-pkg' ) }</Tabs.Tab>
+							<Tabs.Tab value="settings">{ __( 'Settings', 'jetpack-publicize-pkg' ) }</Tabs.Tab>
+						</Tabs.List>
+					</div>
+					<div className="jetpack-social-page__content jetpack-social-page__content--padded">
+						{ children }
+					</div>
+				</Tabs.Root>
+				<JetpackFooter />
+			</Page>
+		</Tooltip.Provider>
 	);
 }
