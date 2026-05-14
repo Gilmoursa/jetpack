@@ -3868,12 +3868,21 @@ importers:
       '@automattic/ui':
         specifier: 1.0.2
         version: 1.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@tanstack/react-query':
+        specifier: 5.90.8
+        version: 5.90.8(react@18.3.1)
+      '@wordpress/admin-ui':
+        specifier: 1.12.0
+        version: 1.12.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/annotations':
         specifier: 3.44.0
         version: 3.44.0(react@18.3.1)
       '@wordpress/api-fetch':
         specifier: 7.44.0
         version: 7.44.0
+      '@wordpress/base-styles':
+        specifier: 6.20.0
+        version: 6.20.0
       '@wordpress/block-editor':
         specifier: 15.17.0
         version: 15.17.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3934,6 +3943,9 @@ importers:
       '@wordpress/preferences':
         specifier: 4.44.0
         version: 4.44.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@wordpress/route':
+        specifier: 0.10.0
+        version: 0.10.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/theme':
         specifier: 0.11.0
         version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3974,6 +3986,9 @@ importers:
       '@automattic/jetpack-webpack-config':
         specifier: workspace:*
         version: link:../../js-packages/webpack-config
+      '@automattic/jetpack-wp-build-polyfills':
+        specifier: workspace:*
+        version: link:../wp-build-polyfills
       '@babel/core':
         specifier: 7.29.0
         version: 7.29.0
@@ -4016,12 +4031,18 @@ importers:
       '@wordpress/browserslist-config':
         specifier: 6.44.0
         version: 6.44.0
+      '@wordpress/build':
+        specifier: 0.13.0
+        version: 0.13.0(@babel/core@7.29.0)(@wordpress/route@0.10.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@wordpress/theme@0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(browserslist@4.28.2)
       autoprefixer:
         specifier: 10.4.20
         version: 10.4.20(postcss@8.5.14)
       babel-jest:
         specifier: 30.3.0
         version: 30.3.0(@babel/core@7.29.0)
+      browserslist:
+        specifier: ^4.24.0
+        version: 4.28.2
       concurrently:
         specifier: 9.2.1
         version: 9.2.1
