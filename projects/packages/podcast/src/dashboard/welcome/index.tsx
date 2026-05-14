@@ -81,7 +81,7 @@ const BENEFITS: ReadonlyArray< { icon: JSX.Element; title: string; body: string 
 		icon: <Icon icon={ megaphone } />,
 		title: __( 'Reach listeners in every app', 'jetpack-podcast' ),
 		body: __(
-			'One feed distributes to Apple Podcasts, Spotify, Overcast, Pocket Casts, and every directory that accepts RSS.',
+			'One feed distributes to Apple Podcasts, Spotify, Overcast, Pocket Casts, and every directory that accepts RSS.',
 			'jetpack-podcast'
 		),
 	},
@@ -115,7 +115,7 @@ const PREMIUM_FEATURES: ReadonlyArray< string > = [
 	__( 'Submission-ready RSS feed for every directory', 'jetpack-podcast' ),
 	__( 'Podcast stats including downloads by app and country', 'jetpack-podcast' ),
 	__( 'Episode dashboard', 'jetpack-podcast' ),
-	__( 'Episode player block', 'jetpack-podcast' ),
+	__( 'Episode player block for your posts', 'jetpack-podcast' ),
 ];
 
 const STEPS: ReadonlyArray< { number: string; title: string; body: string } > = [
@@ -162,7 +162,7 @@ const Welcome = ( { onEnable }: WelcomeProps ) => {
 					</h2>
 					<Text variant="muted">
 						{ __(
-							'Publish your show on the same site as your blog and newsletter. Reach fans on Apple, Spotify, Pocket Casts, and every major podcast app.',
+							'Publish your show on the same site as your blog and newsletter. Reach fans on Apple, Spotify, Pocket Casts, and every major podcast app.',
 							'jetpack-podcast'
 						) }
 					</Text>
@@ -216,11 +216,11 @@ const Welcome = ( { onEnable }: WelcomeProps ) => {
 										<Text size="title" weight={ 500 }>
 											{ __( 'Premium', 'jetpack-podcast' ) }
 										</Text>
-										<span className="podcast__welcome-plan-badge">
-											{ alreadyPremium
-												? __( 'Included in your plan', 'jetpack-podcast' )
-												: __( 'Popular', 'jetpack-podcast' ) }
-										</span>
+										{ alreadyPremium && (
+											<span className="podcast__welcome-plan-badge">
+												{ __( 'Included in your plan', 'jetpack-podcast' ) }
+											</span>
+										) }
 									</HStack>
 									<Text variant="muted">
 										{ __(
