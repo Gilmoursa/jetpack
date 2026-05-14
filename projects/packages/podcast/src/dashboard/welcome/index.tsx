@@ -22,7 +22,7 @@ interface WelcomeProps {
 
 // Prefer `site.suffix` since it preserves the full Calypso site fragment
 // (e.g. `example.com::path` for mapped subdirectory sites). Fall back to
-// the admin_url host for self-hosted setups that do not publish a suffix.
+// the admin_url host as a safety net in case suffix is unexpectedly absent.
 const getSiteSlug = (): string => {
 	const data = getSiteData();
 	if ( data?.suffix ) {
@@ -37,29 +37,6 @@ const getSiteSlug = (): string => {
 	} catch {
 		return '';
 	}
-};
-
-// Plan product slugs that already include the Premium podcast feature set.
-// Sourced from plugins/jetpack/_inc/client/lib/plans/constants.js.
-const PREMIUM_OR_HIGHER_SLUGS: ReadonlySet< string > = new Set( [
-	'value_bundle',
-	'value_bundle-monthly',
-	'value_bundle-2y',
-	'value_bundle-3y',
-	'business-bundle',
-	'business-bundle-monthly',
-	'business-bundle-2y',
-	'business-bundle-3y',
-	'ecommerce-bundle',
-	'ecommerce-bundle-monthly',
-	'ecommerce-bundle-2y',
-	'ecommerce-bundle-3y',
-	'wp_com_hundred_year_bundle_centennially',
-] );
-
-const isOnPremiumOrHigher = (): boolean => {
-	const slug = getSiteData()?.plan?.product_slug;
-	return !! slug && PREMIUM_OR_HIGHER_SLUGS.has( slug );
 };
 
 const getPremiumCheckoutUrl = (): string => {
@@ -143,8 +120,6 @@ const STEPS: ReadonlyArray< { number: string; title: string; body: string } > = 
 ];
 
 const Welcome = ( { onEnable }: WelcomeProps ) => {
-	const alreadyPremium = isOnPremiumOrHigher();
-
 	const onPremiumClick = useCallback( () => {
 		const currentPlan = getSiteData()?.plan?.product_slug;
 		jetpackAnalytics.tracks.recordEvent( 'jetpack_podcast_premium_upgrade_clicked', {
@@ -216,11 +191,9 @@ const Welcome = ( { onEnable }: WelcomeProps ) => {
 										<Text size="title" weight={ 500 }>
 											{ __( 'Premium', 'jetpack-podcast' ) }
 										</Text>
-										{ alreadyPremium && (
-											<span className="podcast__welcome-plan-badge">
-												{ __( 'Included in your plan', 'jetpack-podcast' ) }
-											</span>
-										) }
+										<span className="podcast__welcome-plan-badge">
+											{ __( 'Popular', 'jetpack-podcast' ) }
+										</span>
 									</HStack>
 									<Text variant="muted">
 										{ __(
@@ -229,15 +202,9 @@ const Welcome = ( { onEnable }: WelcomeProps ) => {
 										) }
 									</Text>
 								</VStack>
-								{ alreadyPremium ? (
-									<Button variant="primary" onClick={ onEnable }>
-										{ __( 'Continue setup', 'jetpack-podcast' ) }
-									</Button>
-								) : (
-									<Button variant="primary" onClick={ onPremiumClick }>
-										{ __( 'Start your premium podcast', 'jetpack-podcast' ) }
-									</Button>
-								) }
+								<Button variant="primary" onClick={ onPremiumClick }>
+									{ __( 'Start your premium podcast', 'jetpack-podcast' ) }
+								</Button>
 								<ul className="podcast__welcome-plan-features">
 									{ PREMIUM_FEATURES.map( feature => (
 										<li key={ feature } className="podcast__welcome-plan-feature">
