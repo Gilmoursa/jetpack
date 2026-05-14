@@ -11,6 +11,22 @@ $jetpack-social-inset: var(--wpds-dimension-padding-2xl, 24px);
 body.jetpack_page_jetpack-social,
 body.toplevel_page_jetpack-social {
 
+	// Paint the canvas with the design's `#fcfcfc` surface. The
+	// `--wpds-color-bg-surface-neutral` token would be the natural fit,
+	// but a nested admin-ui ThemeProvider redefines the variable to
+	// `#fff` inside `.admin-ui-page`, so the variable resolves to white
+	// in this scope instead of the documented `#fcfcfc`. Pinning the
+	// hex value keeps the canvas consistent regardless of which
+	// ThemeProvider wraps the descendant.
+	$jetpack-social-canvas: #fcfcfc;
+
+	&,
+	#wpcontent,
+	#wpbody-content,
+	.admin-ui-page {
+		background: $jetpack-social-canvas;
+	}
+
 	// Anchor the page to the stage's height so the body slot below has a
 	// bounded box to fill — see the body-slot rule for the rest of the
 	// app-shell scroll model.
