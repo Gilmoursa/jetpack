@@ -1979,7 +1979,7 @@ const { state } = store( 'wpcom-write', {
 			return state.message || state.headerLabel;
 		},
 		get isClassicWarning() {
-			return state.unsupportedWarning === 'classic';
+			return state.unsupportedWarning === 'classic-editor';
 		},
 		get isBlockEditorWarning() {
 			return state.unsupportedWarning === 'block-editor';
