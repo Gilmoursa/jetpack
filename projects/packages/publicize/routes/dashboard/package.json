@@ -4,6 +4,7 @@
 	"private": true,
 	"dependencies": {
 		"@automattic/jetpack-components": "workspace:*",
+		"@automattic/jetpack-shared-extension-utils": "workspace:*",
 		"@tanstack/react-query": "5.90.8",
 		"@types/react": "18.3.28",
 		"@wordpress/admin-ui": "1.12.0",

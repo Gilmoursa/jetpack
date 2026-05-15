@@ -1,6 +1,5 @@
 import {
 	AdminPage,
-	AdminSection,
 	AdminSectionHero,
 	Container,
 	Col,
@@ -11,62 +10,54 @@ import {
 	useConnection,
 	useConnectionErrorNotice,
 } from '@automattic/jetpack-connection';
-import {
-	getMyJetpackUrl,
-	isJetpackSelfHostedSite,
-	isSimpleSite,
-	siteHasFeature,
-	currentUserCan,
-} from '@automattic/jetpack-script-data';
-import { Button } from '@wordpress/components';
+import { isJetpackSelfHostedSite, isSimpleSite } from '@automattic/jetpack-script-data';
 import { useSelect } from '@wordpress/data';
 import { useState, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { store as socialStore } from '../../social-store';
-import { features, getSocialScriptData, hasSocialPaidFeatures } from '../../utils';
+import { hasSocialPaidFeatures } from '../../utils';
 import ConnectionScreen from './connection-screen';
-import Header from './header';
-import InfoSection from './info-section';
 import PricingPage from './pricing-page';
 import styles from './styles.module.scss';
-import SocialImageGeneratorToggle from './toggles/social-image-generator-toggle';
-import SocialModuleToggle from './toggles/social-module-toggle';
-import SocialNotesToggle from './toggles/social-notes-toggle';
-import UtmToggle from './toggles/utm-toggle';
 
+/**
+ * Pre-empt screens shown when the chassis defers to legacy at the PHP
+ * layer (`Social_Admin_Page::should_preempt_to_legacy`). Two cases
+ * land here:
+ *
+ * 1. Site not connected → `ConnectionScreen`.
+ * 2. Free Jetpack + pricing nudge not dismissed → `PricingPage`.
+ *
+ * The full Social tab UI (Overview + Settings) is owned by the wp-build
+ * chassis. This entry no longer ports the legacy `Header`, the
+ * `AdminSection` toggle bank, or the `InfoSection` — those retired
+ * with the legacy single-page surface in #48824.
+ *
+ * @return The pre-empt screen, or `null` when neither condition holds
+ * (defensive — PHP-level pre-empt is the source of truth).
+ */
 export const SocialAdminPage = () => {
 	const isSimple = isSimpleSite();
-
 	const isJetpackSite = isJetpackSelfHostedSite();
-
 	const { isUserConnected, isRegistered } = useConnection();
 	const { hasConnectionError } = useConnectionErrorNotice();
 	const showConnectionCard = ! isSimple && ( ! isRegistered || ! isUserConnected );
 
 	const [ pricingPageDismissed, setPricingPageDismissed ] = useState( false );
-
 	const onPricingPageDismiss = useCallback( () => setPricingPageDismissed( true ), [] );
 
-	const { isModuleEnabled, showPricingPage, isUpdatingJetpackSettings } = useSelect( select => {
-		const store = select( socialStore );
-		const settings = store.getSocialModuleSettings();
+	const showPricingPage = useSelect(
+		select => select( socialStore ).getSocialSettings().showPricingPage,
+		[]
+	);
 
-		return {
-			isModuleEnabled: settings.publicize,
-			showPricingPage: store.getSocialSettings().showPricingPage,
-			isUpdatingJetpackSettings: store.isSavingSocialModuleSettings(),
-		};
-	}, [] );
-
-	const { social } = getSocialScriptData().plugin_info;
-
-	const canManageOptions = currentUserCan( 'manage_options' );
+	const subTitle = __( 'Publish once. Share everywhere.', 'jetpack-publicize-pkg' );
 
 	if ( showConnectionCard ) {
 		return (
 			<AdminPage
 				title={ 'Social' /** "Social" is a product name, do not translate. */ }
-				subTitle={ __( 'Publish once. Share everywhere.', 'jetpack-publicize-pkg' ) }
+				subTitle={ subTitle }
 				showBackground={ false }
 			>
 				<Container horizontalSpacing={ 3 } horizontalGap={ 3 }>
@@ -78,26 +69,14 @@ export const SocialAdminPage = () => {
 		);
 	}
 
-	const subTitle = __( 'Publish once. Share everywhere.', 'jetpack-publicize-pkg' );
-
-	const licenseAction = ! hasSocialPaidFeatures() && isJetpackSite && (
-		<Button size="compact" variant="secondary" href={ getMyJetpackUrl( '#/add-license' ) }>
-			{ __( 'Use license key', 'jetpack-publicize-pkg' ) }
-		</Button>
-	);
-
-	return (
-		<AdminPage
-			title={ 'Social' /** "Social" is a product name, do not translate. */ }
-			subTitle={ subTitle }
-			actions={ licenseAction }
-		>
-			<GlobalNotices />
-			<div className={ styles.content }>
-				{ isJetpackSite &&
-				! hasSocialPaidFeatures() &&
-				showPricingPage &&
-				! pricingPageDismissed ? (
+	if ( isJetpackSite && ! hasSocialPaidFeatures() && showPricingPage && ! pricingPageDismissed ) {
+		return (
+			<AdminPage
+				title={ 'Social' /** "Social" is a product name, do not translate. */ }
+				subTitle={ subTitle }
+			>
+				<GlobalNotices />
+				<div className={ styles.content }>
 					<AdminSectionHero>
 						<Container horizontalSpacing={ 0 }>
 							{ hasConnectionError && (
@@ -115,34 +94,10 @@ export const SocialAdminPage = () => {
 							</Col>
 						</Container>
 					</AdminSectionHero>
-				) : (
-					<>
-						<AdminSectionHero>
-							<Header />
-						</AdminSectionHero>
-						<AdminSection>
-							<SocialModuleToggle />
-							{ canManageOptions && (
-								<>
-									{ isModuleEnabled && <UtmToggle /> }
-									{
-										// Only show the Social Notes toggle if Social plugin is active
-										social.version && isModuleEnabled && (
-											<SocialNotesToggle disabled={ isUpdatingJetpackSettings } />
-										)
-									}
-									{ isModuleEnabled && siteHasFeature( features.IMAGE_GENERATOR ) && (
-										<SocialImageGeneratorToggle disabled={ isUpdatingJetpackSettings } />
-									) }
-								</>
-							) }
-						</AdminSection>
-						<AdminSectionHero>
-							<InfoSection />
-						</AdminSectionHero>
-					</>
-				) }
-			</div>
-		</AdminPage>
-	);
+				</div>
+			</AdminPage>
+		);
+	}
+
+	return null;
 };

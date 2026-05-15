@@ -25,15 +25,6 @@ class Social_Admin_Page {
 	public const REFRESH_PLAN_NONCE_ACTION = 'jetpack_social_refresh_plan_data';
 
 	/**
-	 * Filter name that gates the wp-build–based dashboard.
-	 *
-	 * When this filter returns true, "Jetpack > Social" renders the new
-	 * wp-build dashboard (Overview + Settings tabs) instead of the legacy
-	 * single-page React app.
-	 */
-	const MODERNIZATION_FILTER = 'rsm_jetpack_ui_modernization_social';
-
-	/**
 	 * The instance of the class.
 	 *
 	 * @var Social_Admin_Page
@@ -57,34 +48,31 @@ class Social_Admin_Page {
 	 * The constructor.
 	 */
 	private function __construct() {
-		// Defer wp-build loading to admin_menu (priority 1) so the modernization
-		// filter — which third parties typically register from a plugins_loaded
-		// or init callback (e.g. via Code Snippets) — has been applied before we
-		// read it, and so the wp-build render function is defined before
-		// `add_menu` (priority 10) reads `function_exists()`.
+		// Defer wp-build loading to admin_menu (priority 1) so the wp-build
+		// render function is defined before `add_menu` (priority 10) reads
+		// `function_exists()`.
 		add_action( 'admin_menu', array( __CLASS__, 'maybe_load_wp_build' ), 1 );
 		add_action( 'admin_menu', array( $this, 'add_menu' ) );
 	}
 
 	/**
-	 * Load wp-build for the Social admin page when modernization is enabled.
+	 * Load the wp-build chassis for the Social admin page.
 	 *
-	 * Hooked to `admin_menu` priority 1 so the modernization filter has been
-	 * registered by any opt-in code (mu-plugins, snippets, themes) before we
-	 * read it, and so the wp-build render function and enqueue hook are in
-	 * place before `add_menu()` runs at the default priority.
+	 * Hooked to `admin_menu` priority 1 so the wp-build render function
+	 * and enqueue hook are in place before `add_menu()` runs at the
+	 * default priority.
 	 *
 	 * @return void
 	 */
 	public static function maybe_load_wp_build() {
-		if ( ! self::is_modernized() || ! self::is_social_admin_request() ) {
+		if ( ! self::is_social_admin_request() ) {
 			return;
 		}
 
-		// The chassis pre-empts to the legacy `SocialAdminPage` when the
-		// site isn't connected or the free-plan pricing nudge should
-		// show, so those flows render exactly as they do today and the
-		// wp-build bundle stays free of the jetpack-connection asset
+		// The chassis pre-empts to a slim React bundle when the site isn't
+		// connected or the free-plan pricing nudge should show. Those flows
+		// render `ConnectionScreen` / `PricingPage` exactly as they do today,
+		// keeping the chassis bundle free of the jetpack-connection asset
 		// imports that the chassis would otherwise have to handle.
 		if ( self::should_preempt_to_legacy() ) {
 			return;
@@ -119,7 +107,12 @@ class Social_Admin_Page {
 			return;
 		}
 
-		$callback = self::is_modernized() && function_exists( 'jetpack_social_jetpack_social_dashboard_wp_admin_render_page' )
+		// Default to the wp-build chassis; fall through to the slim pre-empt
+		// bundle when the site isn't connected or the free-plan pricing nudge
+		// should show. `should_preempt_to_legacy()` is the source of truth for
+		// both wp-build loading and menu-callback selection — keep them in sync.
+		$callback = function_exists( 'jetpack_social_jetpack_social_dashboard_wp_admin_render_page' )
+			&& ! self::should_preempt_to_legacy()
 			? 'jetpack_social_jetpack_social_dashboard_wp_admin_render_page'
 			: array( $this, 'render' );
 
@@ -168,15 +161,17 @@ class Social_Admin_Page {
 	}
 
 	/**
-	 * Enqueue admin scripts and styles.
+	 * Enqueue admin scripts and styles for the slim pre-empt bundle.
+	 *
+	 * Only runs when the chassis has deferred to the legacy entry point
+	 * (`ConnectionScreen` or `PricingPage`). On the happy path the chassis
+	 * owns its own enqueue pipeline and this method short-circuits.
 	 */
 	public function enqueue_admin_scripts() {
 		// This callback is registered via `load-{$page_suffix}` in `add_menu()`,
-		// so it only fires on the Social admin page — no need to re-check the page here.
-		if ( self::is_modernized() ) {
-			// wp-build manages its own enqueue pipeline. The legacy script,
-			// localized config, and media-library bootstrap are intentionally
-			// skipped for the wp-build dashboard.
+		// so it only fires on the Social admin page — no need to re-check
+		// the page here.
+		if ( ! self::should_preempt_to_legacy() ) {
 			return;
 		}
 
@@ -184,10 +179,11 @@ class Social_Admin_Page {
 		wp_dequeue_script( 'jetpack-social' );
 		wp_dequeue_style( 'jetpack-social' );
 
-		// The legacy bundle pulls `wp-theme` / `wp-private-apis` through its
-		// `@wordpress/ui` imports. Those handles don't exist on WordPress < 7.0,
-		// so we use the same polyfill registry the chassis does — otherwise WP
-		// silently drops the script because of an unresolved dependency.
+		// The slim pre-empt bundle pulls `wp-theme` / `wp-private-apis` through
+		// its `@wordpress/ui` imports. Those handles don't exist on WordPress
+		// < 7.0, so we use the same polyfill registry the chassis does —
+		// otherwise WP silently drops the script because of an unresolved
+		// dependency.
 		if ( class_exists( '\Automattic\Jetpack\WP_Build_Polyfills\WP_Build_Polyfills' ) ) {
 			\Automattic\Jetpack\WP_Build_Polyfills\WP_Build_Polyfills::register(
 				'jetpack-social',
@@ -211,7 +207,8 @@ class Social_Admin_Page {
 	 * Load the wp-build entry file and register its polyfills.
 	 *
 	 * Only called on `?page=jetpack-social` admin requests when the
-	 * modernization filter is enabled. Keeps wp-build off every other request.
+	 * happy-path chassis should render (i.e. pre-empt conditions don't
+	 * hold). Keeps wp-build off every other admin request.
 	 *
 	 * @return void
 	 */
@@ -245,8 +242,8 @@ class Social_Admin_Page {
 	 * slug stays `jetpack-social`, so we mutate the screen object in place to make
 	 * the check pass without changing the user-facing URL.
 	 *
-	 * Hooked only when modernization is on AND we're on the Social admin page,
-	 * so this never affects any other request.
+	 * Hooked only on the Social admin page on the happy path, so this never
+	 * affects any other request.
 	 *
 	 * @param \WP_Screen|null $screen The current screen object (passed by WP).
 	 * @return void
@@ -260,27 +257,18 @@ class Social_Admin_Page {
 	}
 
 	/**
-	 * Returns true when the wp-build modernization filter is enabled.
+	 * Returns true when the chassis should defer to the slim pre-empt bundle.
 	 *
-	 * @return bool
-	 */
-	private static function is_modernized() {
-		return (bool) apply_filters( self::MODERNIZATION_FILTER, false );
-	}
-
-	/**
-	 * Returns true when the chassis should defer to the legacy admin page.
-	 *
-	 * The legacy `SocialAdminPage` short-circuits its body with
-	 * `ConnectionScreen` (site not connected) or `PricingPage` (free
-	 * plan, pricing nudge not dismissed). Those components pull in
-	 * `@automattic/jetpack-connection`'s disconnect-dialog assets
-	 * (.jpg / .webp / .svg) and `@use "@wordpress/theme/design-tokens.css"`
-	 * in transitive SCSS — none of which the wp-build esbuild pipeline
-	 * loads out of the box. Detecting those same states server-side here
-	 * lets the chassis stay slim while preserving today's "pre-empt the
-	 * tabs" behaviour: when either holds we fall through to the legacy
-	 * menu callback and the user sees the existing flow.
+	 * The slim entry point short-circuits its body with `ConnectionScreen`
+	 * (site not connected) or `PricingPage` (free plan, pricing nudge not
+	 * dismissed). Those components pull in `@automattic/jetpack-connection`'s
+	 * disconnect-dialog assets (.jpg / .webp / .svg) and
+	 * `@use "@wordpress/theme/design-tokens.css"` in transitive SCSS — none
+	 * of which the wp-build esbuild pipeline loads out of the box. Detecting
+	 * those same states server-side here lets the chassis stay slim while
+	 * preserving today's "pre-empt the tabs" behaviour: when either holds we
+	 * fall through to the legacy menu callback and the user sees the existing
+	 * flow.
 	 *
 	 * @return bool
 	 */

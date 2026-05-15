@@ -1,5 +1,7 @@
+import { useAnalytics } from '@automattic/jetpack-shared-extension-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useDispatch } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useSearch } from '@wordpress/route';
 import { Button, Tabs } from '@wordpress/ui';
@@ -42,7 +44,7 @@ const AddAccountAction = () => {
  * `ConnectionScreen` (site not connected) and `PricingPage` (free
  * Jetpack, not dismissed) pre-empt the chassis at the PHP layer: when
  * either condition holds, `Social_Admin_Page` routes the menu callback
- * to the legacy `SocialAdminPage` shell so those flows render exactly
+ * to a slim pre-empt-only React bundle so those flows render exactly
  * as they do today. The chassis therefore renders only on the happy
  * path — connected + paid/dismissed — and stays free of the
  * jetpack-connection bundle's asset imports.
@@ -58,6 +60,12 @@ const Stage = () => {
 	const activeTab: SocialTab = search.tab === 'settings' ? 'settings' : 'overview';
 
 	const actions = activeTab === 'overview' ? <AddAccountAction /> : null;
+
+	const { recordEvent } = useAnalytics();
+
+	useEffect( () => {
+		recordEvent( 'jetpack_social_tab_view', { tab: activeTab } );
+	}, [ activeTab, recordEvent ] );
 
 	return (
 		<QueryClientProvider client={ queryClient }>
