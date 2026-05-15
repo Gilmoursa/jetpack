@@ -39,6 +39,13 @@
 			color: #fff;
 		}
 
+		// The `<Icon>` SVG defaults to `fill: currentColor` but wp-admin's
+		// global `svg { fill: ... }` rules can override it for links.
+		// Force the icon to inherit the white link color.
+		svg {
+			fill: currentColor;
+		}
+
 		&:hover {
 			background-color: var(--wp-admin-theme-color-darker-10, #005a87);
 		}

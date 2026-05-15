@@ -1,4 +1,5 @@
 import { dateI18n } from '@wordpress/date';
+import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, cloud, download as downloadIcon, backup as backupIcon } from '@wordpress/icons';
 import { Link } from '@wordpress/route';
@@ -12,17 +13,60 @@ type Props = {
 };
 
 /**
+ * Returns the appropriate "Download" header-label given how many files
+ * the visitor has selected in the file browser. With zero selections we
+ * default to the whole-backup download; otherwise we count the selected
+ * paths.
+ *
+ * @param count - Number of currently selected files/folders.
+ * @return Localized button label.
+ */
+function downloadLabel( count: number ): string {
+	if ( count === 0 ) {
+		return __( 'Download backup', 'jetpack-backup-pkg' );
+	}
+	return sprintf(
+		/* translators: %d count of selected files */
+		__( 'Download %d selected files', 'jetpack-backup-pkg' ),
+		count
+	);
+}
+
+/**
+ * Returns the appropriate "Restore" header-label given how many files
+ * the visitor has selected in the file browser.
+ *
+ * @param count - Number of currently selected files/folders.
+ * @return Localized button label.
+ */
+function restoreLabel( count: number ): string {
+	if ( count === 0 ) {
+		return __( 'Restore to this point', 'jetpack-backup-pkg' );
+	}
+	return sprintf(
+		/* translators: %d count of selected files */
+		__( 'Restore %d selected files', 'jetpack-backup-pkg' ),
+		count
+	);
+}
+
+/**
  * Right-pane detail card for a selected backup activity item.
  *
  * Shows the status header with Download / Restore actions linking to the
  * matching sibling routes, the backup's summary line, a timestamp by-line,
- * and a `__files` slot reserved for the file browser (Task 4).
+ * and the file browser. File selection state lives here so the header
+ * actions can switch between "Download backup" and "Download N selected
+ * files" based on what the visitor has checked in the tree.
  *
  * @param props      - Component props.
  * @param props.item - The selected backup activity item.
  * @return The rendered detail card.
  */
 export default function BackupDetail( { item }: Props ) {
+	const [ selectedFiles, setSelectedFiles ] = useState< Set< string > >( () => new Set() );
+	const count = selectedFiles.size;
+
 	return (
 		<Card.Root className="jpb-backup-detail">
 			<Stack
@@ -40,11 +84,11 @@ export default function BackupDetail( { item }: Props ) {
 				<Stack direction="row" gap="sm" align="center">
 					<Link to={ `/download/${ item.rewindId }` } className="jpb-backup-detail__download">
 						<Icon icon={ downloadIcon } size={ 18 } />
-						{ __( 'Download backup', 'jetpack-backup-pkg' ) }
+						{ downloadLabel( count ) }
 					</Link>
 					<Link to={ `/restore/${ item.rewindId }` } className="jpb-backup-detail__restore">
 						<Icon icon={ backupIcon } size={ 18 } />
-						{ __( 'Restore to this point', 'jetpack-backup-pkg' ) }
+						{ restoreLabel( count ) }
 					</Link>
 				</Stack>
 			</Stack>
@@ -58,7 +102,11 @@ export default function BackupDetail( { item }: Props ) {
 				) }
 			</Text>
 			<div className="jpb-backup-detail__files">
-				<FileBrowser rewindId={ item.rewindId } />
+				<FileBrowser
+					rewindId={ item.rewindId }
+					selectedFiles={ selectedFiles }
+					onSelectedFilesChange={ setSelectedFiles }
+				/>
 			</div>
 		</Card.Root>
 	);

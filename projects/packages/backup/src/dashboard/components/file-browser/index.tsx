@@ -17,6 +17,8 @@ import type { FileNode, FileNodeFile } from '../../types/file-tree';
 
 type Props = {
 	rewindId: string;
+	selectedFiles: Set< string >;
+	onSelectedFilesChange: ( next: Set< string > ) => void;
 };
 
 /**
@@ -25,30 +27,38 @@ type Props = {
  * `<FileInfoCard>` to the right of the tree with a text preview when the
  * mime type is text-shaped.
  *
- * @param props          - Component props.
- * @param props.rewindId - The selected backup's rewindId. Surfaced as a data
- *                       attribute today; the future REST hook will use it to
- *                       scope its requests to a specific backup point.
+ * Selection lives in the parent (`<BackupDetail>`) so its header buttons
+ * can swap between "Download backup" and "Download N selected files"
+ * based on the same set of paths the tree tracks.
+ *
+ * @param props                       - Component props.
+ * @param props.rewindId              - The selected backup's rewindId. Surfaced as a data
+ *                                    attribute today; the future REST hook will use it.
+ * @param props.selectedFiles         - Set of currently-selected paths (owned by the parent).
+ * @param props.onSelectedFilesChange - Callback invoked with the next selection set.
  * @return The rendered tree.
  */
-export default function FileBrowser( { rewindId }: Props ) {
-	const [ selected, setSelected ] = useState< Set< string > >( () => new Set() );
+export default function FileBrowser( { rewindId, selectedFiles, onSelectedFilesChange }: Props ) {
 	const [ openFilePath, setOpenFilePath ] = useState< string | null >( null );
 	const { children: roots } = useMockFileTree( null );
 
-	const toggleSelected = useCallback( ( path: string ) => {
-		setSelected( prev => {
-			const next = new Set( prev );
+	const toggleSelected = useCallback(
+		( path: string ) => {
+			const next = new Set( selectedFiles );
 			if ( next.has( path ) ) {
 				next.delete( path );
 			} else {
 				next.add( path );
 			}
-			return next;
-		} );
-	}, [] );
+			onSelectedFilesChange( next );
+		},
+		[ selectedFiles, onSelectedFilesChange ]
+	);
 
-	const clearSelected = useCallback( () => setSelected( new Set() ), [] );
+	const clearSelected = useCallback(
+		() => onSelectedFilesChange( new Set() ),
+		[ onSelectedFilesChange ]
+	);
 	const closeInfoCard = useCallback( () => setOpenFilePath( null ), [] );
 
 	const openFile = roots ? findFileInTree( roots, openFilePath ) : null;
@@ -60,11 +70,11 @@ export default function FileBrowser( { rewindId }: Props ) {
 			</Stack>
 			<Stack direction="row" align="center" gap="sm" className="jpb-file-browser__selection">
 				<CheckboxControl
-					checked={ selected.size > 0 }
+					checked={ selectedFiles.size > 0 }
 					label={ sprintf(
 						/* translators: %d count of selected files */
 						__( '%d files selected', 'jetpack-backup-pkg' ),
-						selected.size
+						selectedFiles.size
 					) }
 					onChange={ clearSelected }
 					__nextHasNoMarginBottom
@@ -77,7 +87,7 @@ export default function FileBrowser( { rewindId }: Props ) {
 							key={ node.path }
 							node={ node }
 							depth={ 0 }
-							selected={ selected }
+							selected={ selectedFiles }
 							onToggleSelected={ toggleSelected }
 							onOpenFile={ setOpenFilePath }
 						/>

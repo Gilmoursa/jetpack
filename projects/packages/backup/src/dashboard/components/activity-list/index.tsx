@@ -1,14 +1,12 @@
 import { SearchControl, Spinner } from '@wordpress/components';
 import { useCallback, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
-import { Icon, settings as settingsIcon } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+import { settings as settingsIcon } from '@wordpress/icons';
 import { Button, Card, Stack } from '@wordpress/ui';
 import { useMockActivityLog } from '../../hooks/use-mock-activity-log';
 import ActivityRow from '../activity-row';
 import './style.scss';
 import type { ActivityItem } from '../../types/activity';
-
-const PAGE_SIZE = 10;
 
 type Props = {
 	selectedId: string | null;
@@ -16,11 +14,11 @@ type Props = {
 };
 
 /**
- * Left pane of the modernized Overview: a paginated, searchable activity list.
+ * Left pane of the modernized Overview: a searchable, scrollable activity list.
  *
- * Owns its own search and pagination state and reads items from the mock hook.
- * Selection is owned by the parent so it can be reflected in the URL and used
- * by the right-hand detail pane.
+ * Owns its own search state and reads items from the mock hook. Selection is
+ * owned by the parent so it can be reflected in the URL and used by the
+ * right-hand detail pane.
  *
  * @param props            - Component props.
  * @param props.selectedId - Currently selected row id, or null when nothing is selected.
@@ -29,25 +27,15 @@ type Props = {
  */
 export default function ActivityList( { selectedId, onSelect }: Props ) {
 	const [ search, setSearch ] = useState( '' );
-	const [ page, setPage ] = useState( 1 );
-	const { items, totalPages, isLoading } = useMockActivityLog( {
-		page,
-		pageSize: PAGE_SIZE,
+	const { items, isLoading } = useMockActivityLog( {
+		page: 1,
+		pageSize: 100,
 		search,
 	} );
 
 	const handleSearchChange = useCallback( ( next: string ) => {
 		setSearch( next );
-		setPage( 1 );
 	}, [] );
-
-	const handlePrevPage = useCallback( () => {
-		setPage( p => Math.max( 1, p - 1 ) );
-	}, [] );
-
-	const handleNextPage = useCallback( () => {
-		setPage( p => Math.min( totalPages, p + 1 ) );
-	}, [ totalPages ] );
 
 	return (
 		<Card.Root className="jpb-activity-list">
@@ -60,10 +48,13 @@ export default function ActivityList( { selectedId, onSelect }: Props ) {
 					__nextHasNoMarginBottom
 				/>
 				<Button
-					variant="tertiary"
+					variant="minimal"
+					tone="neutral"
+					size="small"
 					aria-label={ __( 'Filter activity', 'jetpack-backup-pkg' ) }
-					icon={ <Icon icon={ settingsIcon } /> }
-				/>
+				>
+					<Button.Icon icon={ settingsIcon } />
+				</Button>
 			</Stack>
 			<div className="jpb-activity-list__rows" aria-busy={ isLoading }>
 				{ isLoading ? (
@@ -84,30 +75,6 @@ export default function ActivityList( { selectedId, onSelect }: Props ) {
 					) )
 				) }
 			</div>
-			<Stack
-				direction="row"
-				gap="sm"
-				align="center"
-				justify="space-between"
-				className="jpb-activity-list__footer"
-			>
-				<span>
-					{ sprintf(
-						/* translators: %1$d current page, %2$d total pages */
-						__( 'Page %1$d of %2$d', 'jetpack-backup-pkg' ),
-						page,
-						totalPages
-					) }
-				</span>
-				<Stack direction="row" gap="xs">
-					<Button variant="tertiary" disabled={ page === 1 } onClick={ handlePrevPage }>
-						‹
-					</Button>
-					<Button variant="tertiary" disabled={ page >= totalPages } onClick={ handleNextPage }>
-						›
-					</Button>
-				</Stack>
-			</Stack>
 		</Card.Root>
 	);
 }

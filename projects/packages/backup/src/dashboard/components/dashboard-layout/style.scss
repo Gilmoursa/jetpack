@@ -5,3 +5,42 @@
 	margin-inline: auto;
 	padding: 24px;
 }
+
+.jpb-dashboard-layout {
+	&__title-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		background: #069e08; // Jetpack-green so the icon reads as a product mark.
+		border-radius: 50%;
+		color: #fff;
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	&__footer {
+		box-sizing: border-box;
+		width: 100%;
+		padding: 16px 24px;
+		border-top: 1px solid var(--wp-components-color-gray-200, #e0e0e0);
+		font-size: 13px;
+	}
+
+	&__footer-link {
+		color: var(--wp-components-color-foreground, #1e1e1e);
+		text-decoration: none;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	&__footer-byline {
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+}

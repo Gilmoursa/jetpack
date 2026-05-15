@@ -50,18 +50,19 @@ export default function ActivityRow( { item, isSelected, onSelect }: Props ) {
 			aria-pressed={ isSelected }
 			onClick={ handleClick }
 		>
-			<Icon icon={ ICON_BY_KIND[ item.kind ] } className="jpb-activity-row__icon" />
+			<span className="jpb-activity-row__icon" aria-hidden="true">
+				<Icon icon={ ICON_BY_KIND[ item.kind ] } size={ 20 } />
+			</span>
 			<Stack direction="column" gap="2xs" className="jpb-activity-row__body">
 				<Text weight="600">{ item.title }</Text>
 				<Text size="small" variant="muted">
 					{ dateI18n( 'M j, Y, g:i A', item.publishedAt, undefined ) }
-					{ item.summary && (
-						<>
-							{ '   ' }
-							<span className="jpb-activity-row__summary">{ item.summary }</span>
-						</>
-					) }
 				</Text>
+				{ item.summary && (
+					<Text size="small" variant="muted" className="jpb-activity-row__summary">
+						{ item.summary }
+					</Text>
+				) }
 			</Stack>
 		</button>
 	);
