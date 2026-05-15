@@ -32,7 +32,7 @@ export default function DownloadScreen() {
 					<Icon icon={ arrowLeft } size={ 18 } />
 					{ __( 'Back to overview', 'jetpack-backup-pkg' ) }
 				</Link>
-				<Card className="jpb-download__card">
+				<Card.Root className="jpb-download__card">
 					<Stack direction="row" gap="sm" align="center">
 						<Icon icon={ cloud } />
 						<Stack direction="column" gap="2xs">
@@ -96,7 +96,7 @@ export default function DownloadScreen() {
 							</Button>
 						</Stack>
 					) }
-				</Card>
+				</Card.Root>
 			</div>
 		</DashboardLayout>
 	);

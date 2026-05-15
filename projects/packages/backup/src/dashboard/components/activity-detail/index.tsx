@@ -17,7 +17,7 @@ type Props = {
  */
 export default function ActivityDetail( { item }: Props ) {
 	return (
-		<Card className="jpb-activity-detail">
+		<Card.Root className="jpb-activity-detail">
 			<Stack direction="column" gap="sm">
 				<Text variant="heading-md" render={ <h3 /> }>
 					{ item.title }
@@ -29,6 +29,6 @@ export default function ActivityDetail( { item }: Props ) {
 				</Text>
 				{ item.summary && <Text>{ item.summary }</Text> }
 			</Stack>
-		</Card>
+		</Card.Root>
 	);
 }

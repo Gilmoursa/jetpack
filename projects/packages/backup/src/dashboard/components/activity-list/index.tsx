@@ -50,7 +50,7 @@ export default function ActivityList( { selectedId, onSelect }: Props ) {
 	}, [ totalPages ] );
 
 	return (
-		<Card className="jpb-activity-list">
+		<Card.Root className="jpb-activity-list">
 			<Stack direction="row" gap="sm" align="center" className="jpb-activity-list__header">
 				<SearchControl
 					value={ search }
@@ -108,6 +108,6 @@ export default function ActivityList( { selectedId, onSelect }: Props ) {
 					</Button>
 				</Stack>
 			</Stack>
-		</Card>
+		</Card.Root>
 	);
 }

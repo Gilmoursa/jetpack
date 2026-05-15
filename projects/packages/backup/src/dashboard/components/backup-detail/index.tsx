@@ -24,7 +24,7 @@ type Props = {
  */
 export default function BackupDetail( { item }: Props ) {
 	return (
-		<Card className="jpb-backup-detail">
+		<Card.Root className="jpb-backup-detail">
 			<Stack
 				direction="row"
 				align="center"
@@ -60,6 +60,6 @@ export default function BackupDetail( { item }: Props ) {
 			<div className="jpb-backup-detail__files">
 				<FileBrowser rewindId={ item.rewindId } />
 			</div>
-		</Card>
+		</Card.Root>
 	);
 }

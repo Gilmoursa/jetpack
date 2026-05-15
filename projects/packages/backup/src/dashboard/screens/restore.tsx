@@ -33,7 +33,7 @@ export default function RestoreScreen() {
 					<Icon icon={ arrowLeft } size={ 18 } />
 					{ __( 'Back to overview', 'jetpack-backup-pkg' ) }
 				</Link>
-				<Card className="jpb-restore__card">
+				<Card.Root className="jpb-restore__card">
 					<Stack direction="row" gap="sm" align="center">
 						<Icon icon={ backupIcon } />
 						<Stack direction="column" gap="2xs">
@@ -96,7 +96,7 @@ export default function RestoreScreen() {
 							</Button>
 						</Stack>
 					) }
-				</Card>
+				</Card.Root>
 			</div>
 		</DashboardLayout>
 	);

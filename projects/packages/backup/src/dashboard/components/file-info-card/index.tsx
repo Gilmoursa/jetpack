@@ -54,7 +54,7 @@ export default function FileInfoCard( { file, onClose }: Props ) {
 	const contents = isTextual( file.mimeType ) ? findContents( file.path ) : null;
 
 	return (
-		<Card className="jpb-file-info-card">
+		<Card.Root className="jpb-file-info-card">
 			<Stack direction="row" align="center" justify="space-between">
 				<Text variant="heading-sm" render={ <h4 /> }>
 					{ file.name }
@@ -83,6 +83,6 @@ export default function FileInfoCard( { file, onClose }: Props ) {
 					</Text>
 				) }
 			</div>
-		</Card>
+		</Card.Root>
 	);
 }
