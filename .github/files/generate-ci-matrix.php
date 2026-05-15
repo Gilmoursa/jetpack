@@ -114,7 +114,7 @@ $matrix[] = array(
 foreach ( array( 'php', 'js' ) as $cov_group ) {
 	$matrix[] = array(
 		'name'           => "Code coverage ($cov_group)",
-		'script'         => 'test-coverage',
+		'script'         => "test-$cov_group-coverage",
 		'wp'             => 'latest',
 		'timeout'        => 30, // 2025-11-06: Successful runs took ~15 minutes combined; we'll want to update this when we have new numbers.
 		'coverage-group' => $cov_group,
