@@ -63,7 +63,7 @@ jobs:
     # Note matrix-job outputs are kind of weird. Last-to-run job that sets a non-empty value wins.
     outputs:
       did-coverage: ${{ case( steps.run-tests.conclusion != 'cancelled' && steps.process-coverage.conclusion == 'success' && steps.upload-artifacts.conclusion == 'success', 'true', '' ) }}
-      coverage-status: ${{ case( matrix.script == 'test-coverage', steps.run-tests.conclusion, '' ) }}
+      coverage-status: ${{ case( matrix.script == 'test-php-coverage' || matrix.script == 'test-js-coverage', steps.run-tests.conclusion, '' ) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -83,7 +83,7 @@ jobs:
         uses: ./.github/actions/tool-setup
         with:
           php: ${{ matrix.php }}
-          coverage: ${{ case( matrix.script == 'test-coverage', 'pcov', 'none' ) }}
+          coverage: ${{ case( matrix.script == 'test-php-coverage', 'pcov', 'none' ) }}
           node: ${{ matrix.node }}
 
       - name: Monorepo install
@@ -298,7 +298,7 @@ jobs:
         id: process-coverage
         env:
           CHANGED: ${{ steps.changed.outputs.projects }}
-        if: matrix.script == 'test-coverage' && always()
+        if: ( matrix.script == 'test-php-coverage' || matrix.script == 'test-js-coverage' ) && always()
         run: .github/files/coverage-munger/process-coverage.sh
 
       - name: Check for artifacts
