@@ -4,6 +4,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Stack, Tabs } from '@wordpress/ui';
 import { useState } from 'react';
+import AIAgentAccessControl from 'components/ai-agent-access-control';
 import AiAnswersTab from 'components/ai-answers-tab';
 import ExperienceSelector from 'components/experience-selector';
 import NoticesList from 'components/global-notices';
@@ -126,6 +127,10 @@ export default function DashboardPage( { isLoading = false } ) {
 		select( STORE_ID ).isTogglingInstantSearch()
 	);
 	const isSearchBlocksEnabled = useSelect( select => select( STORE_ID ).isSearchBlocksEnabled() );
+	const showAIAgentAccessGuidelinesLink =
+		! isReaderChatAvailable ||
+		! isReaderChatEnabled ||
+		readerChatGuidelinesUrl !== aiAgentAccessGuidelinesUrl;
 
 	// Record Meter data
 	const tierMaximumRecords = useSelect( select => select( STORE_ID ).getTierMaximumRecords() );
@@ -246,6 +251,12 @@ export default function DashboardPage( { isLoading = false } ) {
 														/>
 													</div>
 												) }
+												<AIAgentAccessControl
+													className="jp-search-ai-agent-access-card"
+													guidelinesUrl={ aiAgentAccessGuidelinesUrl }
+													isAvailable={ isAIAgentAccessAvailable }
+													showGuidelinesLink={ showAIAgentAccessGuidelinesLink }
+												/>
 											</div>
 										</div>
 									</div>
